@@ -5,6 +5,7 @@ A full-stack map application for managing geographic objects (polygons and marke
 ## Tech Stack
 
 **Frontend:**
+
 - React 19 with TypeScript
 - Leaflet / React-Leaflet for map rendering
 - TanStack Query for server state management
@@ -12,9 +13,50 @@ A full-stack map application for managing geographic objects (polygons and marke
 - Vite for build tooling
 
 **Backend:**
+
 - ASP.NET Core 10 REST API
 - MongoDB with GeoJSON for spatial data
 - Clean Architecture (Service + Repository pattern)
+
+## Architecture & Design Decisions
+
+### Backend Architecture
+
+The server follows **Clean Architecture** with explicit separation of concerns:
+
+| Layer | Responsibility |
+|-------|----------------|
+| Controllers | HTTP routing only (thin controllers) |
+| Services | Business logic, validation, DTO ↔ Model mapping |
+| Repositories | Data access, MongoDB operations |
+| DTOs | API contracts (request/response objects) |
+| Models | Database document entities |
+
+**Key Design Choices:**
+
+- **Explicit repository interfaces** per entity rather than generic `IRepository<T>` - allows entity-specific methods like geo queries
+- **Service-level validation** - keeps validation visible and simple for this project scope
+- **DTO pattern** - separates API contracts from database models, making the API database-agnostic
+- **Separate batch endpoint** (`/objects/batch`) - explicit contracts rather than polymorphic endpoints
+- **No UPDATE operations** - per assignment requirements; edit via delete + recreate
+
+### Frontend Architecture
+
+- **Feature-based structure** - code organized by feature (map, polygons, objects) not by type
+- **Split Context pattern** - separate state/dispatch contexts to prevent unnecessary re-renders
+- **React Query for server state** - automatic caching, refetching, loading/error states
+- **Custom hooks** (`usePolygons`, `useObjects`) - encapsulate data fetching logic
+
+### Coordinate Handling
+
+The API uses explicit `{ latitude, longitude }` objects rather than arrays because:
+- GeoJSON uses `[longitude, latitude]` order
+- Leaflet uses `[latitude, longitude]` order
+- Named properties prevent accidental coordinate swaps
+
+Conversion happens at the repository layer, keeping the API clean.
+
+For comprehensive design rationale, see [MapServer/ARCHITECTURE_DECISIONS.md](MapServer/ARCHITECTURE_DECISIONS.md).
 
 ## Prerequisites
 
@@ -34,9 +76,10 @@ cd MapApp
 ### 2. Start MongoDB
 
 Using Docker (recommended):
+
 ```bash
 cd MapServer
-docker-compose up -d
+docker compose up -d
 ```
 
 Or connect to an existing MongoDB instance by updating `MapServer/appsettings.json`.
@@ -92,37 +135,37 @@ MapApp/
 
 ## API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/polygons` | Get all polygons |
-| GET | `/api/polygons/{id}` | Get polygon by ID |
-| POST | `/api/polygons` | Create polygon |
-| DELETE | `/api/polygons/{id}` | Delete polygon |
-| DELETE | `/api/polygons` | Delete all polygons |
-| GET | `/api/objects` | Get all map objects |
-| GET | `/api/objects/{id}` | Get object by ID |
-| POST | `/api/objects` | Create single object |
-| POST | `/api/objects/batch` | Create multiple objects |
-| DELETE | `/api/objects/{id}` | Delete object |
-| DELETE | `/api/objects` | Delete all objects |
+| Method | Endpoint             | Description             |
+| ------ | -------------------- | ----------------------- |
+| GET    | `/api/polygons`      | Get all polygons        |
+| GET    | `/api/polygons/{id}` | Get polygon by ID       |
+| POST   | `/api/polygons`      | Create polygon          |
+| DELETE | `/api/polygons/{id}` | Delete polygon          |
+| DELETE | `/api/polygons`      | Delete all polygons     |
+| GET    | `/api/objects`       | Get all map objects     |
+| GET    | `/api/objects/{id}`  | Get object by ID        |
+| POST   | `/api/objects`       | Create single object    |
+| POST   | `/api/objects/batch` | Create multiple objects |
+| DELETE | `/api/objects/{id}`  | Delete object           |
+| DELETE | `/api/objects`       | Delete all objects      |
 
 ## Available Scripts
 
 ### Frontend (MapClient)
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Build for production |
-| `npm run lint` | Run ESLint |
+| Command           | Description              |
+| ----------------- | ------------------------ |
+| `npm run dev`     | Start development server |
+| `npm run build`   | Build for production     |
+| `npm run lint`    | Run ESLint               |
 | `npm run preview` | Preview production build |
 
 ### Backend (MapServer)
 
-| Command | Description |
-|---------|-------------|
-| `dotnet run` | Run the server |
-| `dotnet build` | Build the project |
+| Command          | Description          |
+| ---------------- | -------------------- |
+| `dotnet run`     | Run the server       |
+| `dotnet build`   | Build the project    |
 | `dotnet restore` | Restore dependencies |
 
 ## Configuration
@@ -143,3 +186,8 @@ MapApp/
 ### Frontend
 
 The Vite dev server proxies `/api` requests to `http://localhost:5102`. This can be changed in `vite.config.ts`.
+
+## Documentation
+
+- [ARCHITECTURE_DECISIONS.md](MapServer/ARCHITECTURE_DECISIONS.md) - Detailed rationale for every architectural choice, with alternatives considered
+- [BACKEND_CONCEPTS.md](MapServer/BACKEND_CONCEPTS.md) - Backend programming concepts explained in plain English

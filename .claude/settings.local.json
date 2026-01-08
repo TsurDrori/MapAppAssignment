@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(git init:*)",
-      "Bash(git add:*)",
-      "Bash(git commit -m \"$\\(cat <<''EOF''\nInitial commit: MapApp full-stack map application\n\n- React 19 + TypeScript frontend with Leaflet map rendering\n- ASP.NET Core 10 REST API backend with MongoDB\n- Features: polygon drawing, marker placement, data management\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
-    ]
-  }
-}

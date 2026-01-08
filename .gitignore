@@ -40,3 +40,8 @@ project.lock.json
 
 # MongoDB data (if using local volume)
 mongo-data/
+
+# Claude Code AI assistant files (not relevant for reviewers)
+.claude/
+CLAUDE.md
+**/CLAUDE.md
