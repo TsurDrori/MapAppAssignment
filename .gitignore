@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+bin/
+obj/
+
+# IDE
+.idea/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# .NET
+*.dll
+*.exe
+*.pdb
+*.cache
+project.lock.json
+
+# Vite
+*.local
+
+# MongoDB data (if using local volume)
+mongo-data/

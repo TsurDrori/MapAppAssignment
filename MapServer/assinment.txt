@@ -1,0 +1,38 @@
+Job Interview Task – Map Application (Client/Server)
+Objectives
+Develop a Client–Server application for managing geographic objects (Polygons and Objects) on an interactive map.
+- Client: React (with a map library such as Leaflet/MapLibre)
+- Server: ASP.NET Core (REST API)
+- Database: MongoDB
+UI Layout
+The application will be divided into four panels:
+1. Map – A large central panel on the left showing the interactive map.
+2. Polygon – A panel on the top right for polygon management.
+3. Objects – A panel below Polygon for object (Marker) management.
+4. Map Data – A panel below Objects with a table containing: Object / Lat / Lon.
+ Actions
+
+Polygon
+- Add – Switches the map to drawing mode. The user clicks on the map to create vertices. Clicking the starting point again closes the polygon.
+- Save – Sends polygon data to the server using a RESTful API (POST). Data is stored in MongoDB and the Map Data table is updated.
+- Delete – Deletes a selected polygon or all polygons from the map and database using a DELETE request.
+Objects
+- Add – Adds a new object on the map. The object can be a standard Marker or a custom Symbol (e.g., Jeep).
+- Save – Sends the list of objects to the server (POST). Data is stored in MongoDB and the table is updated.
+- Delete – Removes the selected object from the map and the database (DELETE).
+Functional Requirements – Client
+- Interactive map with polygon drawing.
+- Ability to add Objects as Markers or custom Symbols (e.g., Jeep).
+- Add / Save / Delete buttons function as expected.
+- Map Data table updates after each Save action.
+Functional Requirements – Server
+- Implement REST API for Polygons and Objects (Create, Read, Delete).
+- Store data in MongoDB using GeoJSON structure.
+- Return updated data to the client after Save operations.
+Acceptance Criteria
+1. Map is displayed and polygons can be drawn.
+2. Polygon management (Add / Save / Delete) works as expected.
+3. Objects can be added as standard Markers or custom Symbols (such as Jeep).
+4. Map Data table updates correctly with Object / Lat / Lon.
+5. Data is stored and retrieved from MongoDB via RESTful API.
+6. Code is clean, documented, and modular.

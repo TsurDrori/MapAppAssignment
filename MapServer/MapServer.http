@@ -1,0 +1,149 @@
+@MapServer_HostAddress = http://localhost:5102
+@polygonId = REPLACE_WITH_ACTUAL_ID
+@objectId = REPLACE_WITH_ACTUAL_ID
+
+### Health Check - Get OpenAPI spec (dev only)
+GET {{MapServer_HostAddress}}/openapi/v1.json
+Accept: application/json
+
+###############################################################################
+# POLYGONS
+###############################################################################
+
+### Get all polygons
+GET {{MapServer_HostAddress}}/api/polygons
+Accept: application/json
+
+### Get polygon by ID
+GET {{MapServer_HostAddress}}/api/polygons/{{polygonId}}
+Accept: application/json
+
+### Create polygon - Simple Triangle (auto-closed by server)
+POST {{MapServer_HostAddress}}/api/polygons
+Content-Type: application/json
+
+{
+  "coordinates": [
+    { "latitude": 32.08, "longitude": 34.78 },
+    { "latitude": 32.08, "longitude": 34.79 },
+    { "latitude": 32.09, "longitude": 34.79 }
+  ]
+}
+
+### Create polygon - Rectangle (already closed)
+POST {{MapServer_HostAddress}}/api/polygons
+Content-Type: application/json
+
+{
+  "coordinates": [
+    { "latitude": 32.10, "longitude": 34.80 },
+    { "latitude": 32.10, "longitude": 34.81 },
+    { "latitude": 32.11, "longitude": 34.81 },
+    { "latitude": 32.11, "longitude": 34.80 },
+    { "latitude": 32.10, "longitude": 34.80 }
+  ]
+}
+
+### Create polygon - Invalid (only 2 points) - Should fail
+POST {{MapServer_HostAddress}}/api/polygons
+Content-Type: application/json
+
+{
+  "coordinates": [
+    { "latitude": 32.08, "longitude": 34.78 },
+    { "latitude": 32.09, "longitude": 34.79 }
+  ]
+}
+
+### Create polygon - Invalid coordinate (lat out of range) - Should fail
+POST {{MapServer_HostAddress}}/api/polygons
+Content-Type: application/json
+
+{
+  "coordinates": [
+    { "latitude": 92.0, "longitude": 34.78 },
+    { "latitude": 32.08, "longitude": 34.79 },
+    { "latitude": 32.09, "longitude": 34.79 }
+  ]
+}
+
+### Delete polygon by ID
+DELETE {{MapServer_HostAddress}}/api/polygons/{{polygonId}}
+
+### Delete all polygons
+DELETE {{MapServer_HostAddress}}/api/polygons
+
+###############################################################################
+# MAP OBJECTS
+###############################################################################
+
+### Get all map objects
+GET {{MapServer_HostAddress}}/api/objects
+Accept: application/json
+
+### Get map object by ID
+GET {{MapServer_HostAddress}}/api/objects/{{objectId}}
+Accept: application/json
+
+### Create map object - Marker
+POST {{MapServer_HostAddress}}/api/objects
+Content-Type: application/json
+
+{
+  "location": { "latitude": 32.08, "longitude": 34.78 },
+  "objectType": "Marker"
+}
+
+### Create map object - Jeep
+POST {{MapServer_HostAddress}}/api/objects
+Content-Type: application/json
+
+{
+  "location": { "latitude": 32.09, "longitude": 34.79 },
+  "objectType": "Jeep"
+}
+
+### Create map object - Custom type (any string accepted)
+POST {{MapServer_HostAddress}}/api/objects
+Content-Type: application/json
+
+{
+  "location": { "latitude": 32.10, "longitude": 34.80 },
+  "objectType": "CustomMarker"
+}
+
+### Batch create map objects
+POST {{MapServer_HostAddress}}/api/objects/batch
+Content-Type: application/json
+
+{
+  "objects": [
+    {
+      "location": { "latitude": 32.11, "longitude": 34.81 },
+      "objectType": "Marker"
+    },
+    {
+      "location": { "latitude": 32.12, "longitude": 34.82 },
+      "objectType": "Jeep"
+    },
+    {
+      "location": { "latitude": 32.13, "longitude": 34.83 },
+      "objectType": "Marker"
+    }
+  ]
+}
+
+### Create map object - Invalid coordinate (lon out of range) - Should fail
+POST {{MapServer_HostAddress}}/api/objects
+Content-Type: application/json
+
+{
+  "location": { "latitude": 32.08, "longitude": 185.0 },
+  "objectType": "Marker"
+}
+
+### Delete map object by ID
+DELETE {{MapServer_HostAddress}}/api/objects/{{objectId}}
+
+### Delete all map objects
+DELETE {{MapServer_HostAddress}}/api/objects
