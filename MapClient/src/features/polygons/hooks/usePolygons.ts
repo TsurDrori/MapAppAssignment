@@ -7,13 +7,26 @@ import type { CreatePolygonRequest } from '@/types/api.types';
 export const POLYGONS_QUERY_KEY = ['polygons'] as const;
 
 export function usePolygons() {
+  const toast = useToastActions();
+
   return useQuery({
     queryKey: POLYGONS_QUERY_KEY,
-    queryFn: polygonApi.getAll,
+    queryFn: async () => {
+      try {
+        return await polygonApi.getAll();
+      } catch (error) {
+        toast.error(getErrorMessage(error, 'Failed to load polygons'));
+        throw error;
+      }
+    },
   });
 }
 
-export function useCreatePolygon() {
+interface CreatePolygonOptions {
+  onSuccess?: () => void;
+}
+
+export function useCreatePolygon(options?: CreatePolygonOptions) {
   const queryClient = useQueryClient();
   const toast = useToastActions();
 
@@ -22,14 +35,17 @@ export function useCreatePolygon() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: POLYGONS_QUERY_KEY });
       toast.success('Polygon created');
+      options?.onSuccess?.();
     },
-    onError: (error) => {
-      toast.error(getErrorMessage(error, 'Failed to create polygon'));
-    },
+    // Note: onError not defined - PolygonPanel handles errors inline
   });
 }
 
-export function useDeletePolygon() {
+interface DeletePolygonOptions {
+  onSuccess?: () => void;
+}
+
+export function useDeletePolygon(options?: DeletePolygonOptions) {
   const queryClient = useQueryClient();
   const toast = useToastActions();
 
@@ -38,6 +54,7 @@ export function useDeletePolygon() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: POLYGONS_QUERY_KEY });
       toast.success('Polygon deleted');
+      options?.onSuccess?.();
     },
     onError: (error) => {
       toast.error(getErrorMessage(error, 'Failed to delete polygon'));
@@ -45,7 +62,11 @@ export function useDeletePolygon() {
   });
 }
 
-export function useDeleteAllPolygons() {
+interface DeleteAllPolygonsOptions {
+  onSuccess?: () => void;
+}
+
+export function useDeleteAllPolygons(options?: DeleteAllPolygonsOptions) {
   const queryClient = useQueryClient();
   const toast = useToastActions();
 
@@ -54,6 +75,7 @@ export function useDeleteAllPolygons() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: POLYGONS_QUERY_KEY });
       toast.success('All polygons deleted');
+      options?.onSuccess?.();
     },
     onError: (error) => {
       toast.error(getErrorMessage(error, 'Failed to delete polygons'));

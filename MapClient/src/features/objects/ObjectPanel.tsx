@@ -2,6 +2,7 @@ import { Panel } from '@/components/ui/Panel';
 import { Button } from '@/components/ui/Button';
 import { ObjectTypeSelector } from './ObjectTypeSelector';
 import { useMapState, useMapDispatch } from '@/context/MapContext';
+import { getErrorMessage } from '@/utils/errors';
 import {
   useCreateObjectsBatch,
   useDeleteObject,
@@ -17,9 +18,18 @@ export function ObjectPanel() {
   } = useMapState();
   const dispatch = useMapDispatch();
 
-  const createObjectsBatch = useCreateObjectsBatch();
-  const deleteObject = useDeleteObject();
-  const deleteAllObjects = useDeleteAllObjects();
+  const createObjectsBatch = useCreateObjectsBatch({
+    onSuccess: () => {
+      dispatch({ type: 'CLEAR_PENDING_OBJECTS' });
+      dispatch({ type: 'EXIT_PLACE_OBJECT_MODE' });
+    },
+  });
+  const deleteObject = useDeleteObject({
+    onSuccess: () => dispatch({ type: 'SELECT_OBJECT', payload: null }),
+  });
+  const deleteAllObjects = useDeleteAllObjects({
+    onSuccess: () => dispatch({ type: 'SELECT_OBJECT', payload: null }),
+  });
 
   const isPlacing = mode === 'place-object';
   const hasPendingObjects = pendingObjects.length > 0;
@@ -36,41 +46,29 @@ export function ObjectPanel() {
   const handleSave = () => {
     if (!hasPendingObjects) return;
 
-    createObjectsBatch.mutate(
-      {
-        objects: pendingObjects.map((obj) => ({
-          location: obj.location,
-          objectType: obj.objectType,
-        })),
-      },
-      {
-        onSuccess: () => {
-          dispatch({ type: 'CLEAR_PENDING_OBJECTS' });
-          dispatch({ type: 'EXIT_PLACE_OBJECT_MODE' });
-        },
-      }
-    );
+    createObjectsBatch.mutate({
+      objects: pendingObjects.map((obj) => ({
+        location: obj.location,
+        objectType: obj.objectType,
+      })),
+    });
   };
 
   const handleDeleteSelected = () => {
     if (!selectedObjectId) return;
-
-    deleteObject.mutate(selectedObjectId, {
-      onSuccess: () => {
-        dispatch({ type: 'SELECT_OBJECT', payload: null });
-      },
-    });
+    deleteObject.mutate(selectedObjectId);
   };
 
   const handleDeleteAll = () => {
     if (confirm('Are you sure you want to delete all objects?')) {
-      deleteAllObjects.mutate(undefined, {
-        onSuccess: () => {
-          dispatch({ type: 'SELECT_OBJECT', payload: null });
-        },
-      });
+      deleteAllObjects.mutate();
     }
   };
+
+  // Inline error for create mutation
+  const inlineError = createObjectsBatch.isError
+    ? getErrorMessage(createObjectsBatch.error, 'Failed to save')
+    : null;
 
   const handleTypeChange = (newType: string) => {
     dispatch({ type: 'SET_OBJECT_TYPE', payload: newType });
@@ -104,6 +102,27 @@ export function ObjectPanel() {
                 {pendingObjects.length} pending. Click Save to confirm.
               </p>
             )}
+          </div>
+        )}
+
+        {/* Inline error display */}
+        {inlineError && (
+          <div className="rounded-xl bg-rose-500/10 p-3 text-sm ring-1 ring-inset ring-rose-600/20">
+            <div className="flex items-start gap-2">
+              <svg className="h-5 w-5 flex-shrink-0 text-rose-600" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+              </svg>
+              <p className="flex-1 text-rose-700">{inlineError}</p>
+              <button
+                onClick={() => createObjectsBatch.reset()}
+                className="flex-shrink-0 text-rose-600 hover:text-rose-800 transition-colors"
+                aria-label="Dismiss error"
+              >
+                <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                </svg>
+              </button>
+            </div>
           </div>
         )}
 

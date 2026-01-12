@@ -14,12 +14,13 @@ interface TableItem {
 }
 
 export function DataTablePanel() {
-  const { data: polygons, isLoading: polygonsLoading } = usePolygons();
-  const { data: objects, isLoading: objectsLoading } = useObjects();
+  const { data: polygons, isLoading: polygonsLoading, isError: polygonsError } = usePolygons();
+  const { data: objects, isLoading: objectsLoading, isError: objectsError } = useObjects();
   const { selectedPolygonId, selectedObjectId } = useMapState();
   const dispatch = useMapDispatch();
 
   const isLoading = polygonsLoading || objectsLoading;
+  const hasError = polygonsError || objectsError;
 
   // Combine polygons and objects into a single table
   const tableData = useMemo<TableItem[]>(() => {
@@ -105,6 +106,10 @@ export function DataTablePanel() {
       {isLoading ? (
         <div className="flex flex-1 items-center justify-center py-8 text-sm text-slate-600">
           Loading…
+        </div>
+      ) : hasError ? (
+        <div className="flex flex-1 items-center justify-center py-8 text-sm text-rose-600">
+          Failed to load data. Please try again.
         </div>
       ) : (
         <div className="flex-1 min-h-0">

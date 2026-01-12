@@ -7,13 +7,26 @@ import type { CreateMapObjectRequest, BatchCreateMapObjectsRequest } from '@/typ
 export const OBJECTS_QUERY_KEY = ['objects'] as const;
 
 export function useObjects() {
+  const toast = useToastActions();
+
   return useQuery({
     queryKey: OBJECTS_QUERY_KEY,
-    queryFn: objectApi.getAll,
+    queryFn: async () => {
+      try {
+        return await objectApi.getAll();
+      } catch (error) {
+        toast.error(getErrorMessage(error, 'Failed to load objects'));
+        throw error;
+      }
+    },
   });
 }
 
-export function useCreateObject() {
+interface CreateObjectOptions {
+  onSuccess?: () => void;
+}
+
+export function useCreateObject(options?: CreateObjectOptions) {
   const queryClient = useQueryClient();
   const toast = useToastActions();
 
@@ -22,6 +35,7 @@ export function useCreateObject() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: OBJECTS_QUERY_KEY });
       toast.success('Object created');
+      options?.onSuccess?.();
     },
     onError: (error) => {
       toast.error(getErrorMessage(error, 'Failed to create object'));
@@ -29,7 +43,11 @@ export function useCreateObject() {
   });
 }
 
-export function useCreateObjectsBatch() {
+interface CreateObjectsBatchOptions {
+  onSuccess?: () => void;
+}
+
+export function useCreateObjectsBatch(options?: CreateObjectsBatchOptions) {
   const queryClient = useQueryClient();
   const toast = useToastActions();
 
@@ -39,6 +57,7 @@ export function useCreateObjectsBatch() {
       queryClient.invalidateQueries({ queryKey: OBJECTS_QUERY_KEY });
       const count = data?.length ?? 0;
       toast.success(`${count} object${count === 1 ? '' : 's'} created`);
+      options?.onSuccess?.();
     },
     onError: (error) => {
       toast.error(getErrorMessage(error, 'Failed to create objects'));
@@ -46,7 +65,11 @@ export function useCreateObjectsBatch() {
   });
 }
 
-export function useDeleteObject() {
+interface DeleteObjectOptions {
+  onSuccess?: () => void;
+}
+
+export function useDeleteObject(options?: DeleteObjectOptions) {
   const queryClient = useQueryClient();
   const toast = useToastActions();
 
@@ -55,6 +78,7 @@ export function useDeleteObject() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: OBJECTS_QUERY_KEY });
       toast.success('Object deleted');
+      options?.onSuccess?.();
     },
     onError: (error) => {
       toast.error(getErrorMessage(error, 'Failed to delete object'));
@@ -62,7 +86,11 @@ export function useDeleteObject() {
   });
 }
 
-export function useDeleteAllObjects() {
+interface DeleteAllObjectsOptions {
+  onSuccess?: () => void;
+}
+
+export function useDeleteAllObjects(options?: DeleteAllObjectsOptions) {
   const queryClient = useQueryClient();
   const toast = useToastActions();
 
@@ -71,6 +99,7 @@ export function useDeleteAllObjects() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: OBJECTS_QUERY_KEY });
       toast.success('All objects deleted');
+      options?.onSuccess?.();
     },
     onError: (error) => {
       toast.error(getErrorMessage(error, 'Failed to delete objects'));

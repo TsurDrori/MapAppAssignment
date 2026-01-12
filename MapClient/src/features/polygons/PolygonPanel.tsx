@@ -16,9 +16,15 @@ export function PolygonPanel() {
   const dispatch = useMapDispatch();
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  const createPolygon = useCreatePolygon();
-  const deletePolygon = useDeletePolygon();
-  const deleteAllPolygons = useDeleteAllPolygons();
+  const createPolygon = useCreatePolygon({
+    onSuccess: () => dispatch({ type: 'EXIT_DRAW_MODE' }),
+  });
+  const deletePolygon = useDeletePolygon({
+    onSuccess: () => dispatch({ type: 'SELECT_POLYGON', payload: null }),
+  });
+  const deleteAllPolygons = useDeleteAllPolygons({
+    onSuccess: () => dispatch({ type: 'SELECT_POLYGON', payload: null }),
+  });
 
   const isDrawing = mode === 'draw-polygon';
   const canSave = isPolygonClosed && pendingPolygonPoints.length >= 3;
@@ -49,14 +55,7 @@ export function PolygonPanel() {
     }
 
     setValidationError(null);
-    createPolygon.mutate(
-      { coordinates: pendingPolygonPoints },
-      {
-        onSuccess: () => {
-          dispatch({ type: 'EXIT_DRAW_MODE' });
-        },
-      }
-    );
+    createPolygon.mutate({ coordinates: pendingPolygonPoints });
   };
 
   // Combine validation error with mutation error for inline display
@@ -65,21 +64,12 @@ export function PolygonPanel() {
 
   const handleDeleteSelected = () => {
     if (!selectedPolygonId) return;
-
-    deletePolygon.mutate(selectedPolygonId, {
-      onSuccess: () => {
-        dispatch({ type: 'SELECT_POLYGON', payload: null });
-      },
-    });
+    deletePolygon.mutate(selectedPolygonId);
   };
 
   const handleDeleteAll = () => {
     if (confirm('Are you sure you want to delete all polygons?')) {
-      deleteAllPolygons.mutate(undefined, {
-        onSuccess: () => {
-          dispatch({ type: 'SELECT_POLYGON', payload: null });
-        },
-      });
+      deleteAllPolygons.mutate();
     }
   };
 
