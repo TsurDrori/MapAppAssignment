@@ -18,46 +18,6 @@ A full-stack map application for managing geographic objects (polygons and marke
 - MongoDB with GeoJSON for spatial data
 - Clean Architecture (Service + Repository pattern)
 
-## Architecture & Design Decisions
-
-### Backend Architecture
-
-The server follows **Clean Architecture** with explicit separation of concerns:
-
-| Layer | Responsibility |
-|-------|----------------|
-| Controllers | HTTP routing only (thin controllers) |
-| Services | Business logic, validation, DTO ↔ Model mapping |
-| Repositories | Data access, MongoDB operations |
-| DTOs | API contracts (request/response objects) |
-| Models | Database document entities |
-
-**Key Design Choices:**
-
-- **Explicit repository interfaces** per entity rather than generic `IRepository<T>` - allows entity-specific methods like geo queries
-- **Service-level validation** - keeps validation visible and simple for this project scope
-- **DTO pattern** - separates API contracts from database models, making the API database-agnostic
-- **Separate batch endpoint** (`/objects/batch`) - explicit contracts rather than polymorphic endpoints
-- **No UPDATE operations** - per assignment requirements; edit via delete + recreate
-
-### Frontend Architecture
-
-- **Feature-based structure** - code organized by feature (map, polygons, objects) not by type
-- **Split Context pattern** - separate state/dispatch contexts to prevent unnecessary re-renders
-- **React Query for server state** - automatic caching, refetching, loading/error states
-- **Custom hooks** (`usePolygons`, `useObjects`) - encapsulate data fetching logic
-
-### Coordinate Handling
-
-The API uses explicit `{ latitude, longitude }` objects rather than arrays because:
-- GeoJSON uses `[longitude, latitude]` order
-- Leaflet uses `[latitude, longitude]` order
-- Named properties prevent accidental coordinate swaps
-
-Conversion happens at the repository layer, keeping the API clean.
-
-For comprehensive design rationale, see [MapServer/ARCHITECTURE_DECISIONS.md](MapServer/ARCHITECTURE_DECISIONS.md).
-
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/) (v18+)
@@ -186,6 +146,46 @@ MapApp/
 ### Frontend
 
 The Vite dev server proxies `/api` requests to `http://localhost:5102`. This can be changed in `vite.config.ts`.
+
+## Architecture & Design Decisions
+
+### Backend Architecture
+
+The server follows **Clean Architecture** with explicit separation of concerns:
+
+| Layer        | Responsibility                                  |
+| ------------ | ----------------------------------------------- |
+| Controllers  | HTTP routing only (thin controllers)            |
+| Services     | Business logic, validation, DTO ↔ Model mapping |
+| Repositories | Data access, MongoDB operations                 |
+| DTOs         | API contracts (request/response objects)        |
+| Models       | Database document entities                      |
+
+**Key Design Choices:**
+
+- **Explicit repository interfaces** per entity rather than generic `IRepository<T>` - allows entity-specific methods like geo queries
+- **Service-level validation** - keeps validation visible and simple for this project scope
+- **DTO pattern** - separates API contracts from database models, making the API database-agnostic
+- **Separate batch endpoint** (`/objects/batch`) - explicit contracts rather than polymorphic endpoints
+
+### Frontend Architecture
+
+- **Feature-based structure** - code organized by feature (map, polygons, objects) not by type
+- **Split Context pattern** - separate state/dispatch contexts to prevent unnecessary re-renders
+- **React Query for server state** - automatic caching, refetching, loading/error states
+- **Custom hooks** (`usePolygons`, `useObjects`) - encapsulate data fetching logic
+
+### Coordinate Handling
+
+The API uses explicit `{ latitude, longitude }` objects rather than arrays because:
+
+- GeoJSON uses `[longitude, latitude]` order
+- Leaflet uses `[latitude, longitude]` order
+- Named properties prevent accidental coordinate swaps
+
+Conversion happens at the repository layer, keeping the API clean.
+
+For comprehensive design rationale, see [MapServer/ARCHITECTURE_DECISIONS.md](MapServer/ARCHITECTURE_DECISIONS.md).
 
 ## Documentation
 

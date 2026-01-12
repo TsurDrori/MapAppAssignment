@@ -9,9 +9,12 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary: 'bg-blue-600 hover:bg-blue-700 text-white',
-  secondary: 'bg-gray-200 hover:bg-gray-300 text-gray-800',
-  danger: 'bg-red-600 hover:bg-red-700 text-white',
+  primary:
+    'bg-sky-600 text-white ring-sky-600/25 hover:bg-sky-700 active:bg-sky-800',
+  secondary:
+    'bg-white/80 text-slate-900 ring-slate-900/10 hover:bg-white hover:ring-slate-900/15 active:bg-slate-50',
+  danger:
+    'bg-rose-600 text-white ring-rose-600/25 hover:bg-rose-700 active:bg-rose-800',
 };
 
 export function Button({
@@ -24,14 +27,19 @@ export function Button({
 }: ButtonProps) {
   return (
     <button
-      className={`
-        px-3 py-1.5 rounded text-sm font-medium
-        transition-colors duration-150
-        disabled:opacity-50 disabled:cursor-not-allowed
-        ${variantStyles[variant]}
-        ${className}
-      `}
+      className={[
+        'inline-flex items-center justify-center gap-2',
+        'rounded-lg px-3.5 py-2 text-sm font-semibold',
+        'shadow-sm ring-1 ring-inset',
+        'transition',
+        'hover:-translate-y-px active:translate-y-0',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white',
+        'disabled:pointer-events-none disabled:opacity-55 disabled:shadow-none',
+        variantStyles[variant],
+        className,
+      ].join(' ')}
       disabled={disabled || isLoading}
+      aria-busy={isLoading || undefined}
       {...props}
     >
       {isLoading ? (
@@ -56,7 +64,7 @@ export function Button({
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
             />
           </svg>
-          Loading...
+          <span className="leading-none">Loading…</span>
         </span>
       ) : (
         children

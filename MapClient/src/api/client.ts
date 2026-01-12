@@ -10,17 +10,49 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * Maps HTTP status codes to user-friendly messages.
+ */
+function getHttpErrorMessage(status: number, serverDetail?: string): string {
+  if (serverDetail) return serverDetail;
+
+  switch (status) {
+    case 400: return 'Invalid request data';
+    case 401: return 'Authentication required';
+    case 403: return 'Access denied';
+    case 404: return 'Resource not found';
+    case 409: return 'Conflict with existing data';
+    case 422: return 'Validation failed';
+    case 429: return 'Too many requests, please slow down';
+    case 500: return 'Server error, please try again';
+    case 502: return 'Server is temporarily unavailable';
+    case 503: return 'Service unavailable, please try again later';
+    default: return `Request failed (${status})`;
+  }
+}
+
 async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(endpoint, {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    ...options,
-  });
+  let response: Response;
+
+  try {
+    response = await fetch(endpoint, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      ...options,
+    });
+  } catch (error) {
+    // Network error - server unreachable, no internet, CORS, etc.
+    if (error instanceof TypeError) {
+      throw new ApiError(0, 'Cannot connect to server. Please check your connection.');
+    }
+    throw new ApiError(0, 'Network error occurred');
+  }
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ detail: 'Request failed' }));
-    throw new ApiError(response.status, error.detail ?? 'Request failed');
+    const errorBody = await response.json().catch(() => ({}));
+    const detail = getHttpErrorMessage(response.status, errorBody.detail);
+    throw new ApiError(response.status, detail);
   }
 
   if (response.status === 204) {

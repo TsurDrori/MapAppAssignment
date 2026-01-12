@@ -8,32 +8,88 @@ import { useMapState } from '@/context/MapContext';
 function AppContent() {
   const { mode } = useMapState();
 
+  const statusLabel =
+    mode === 'view'
+      ? 'View mode'
+      : mode === 'draw-polygon'
+        ? 'Drawing polygon'
+        : 'Placing objects';
+
+  const statusHint =
+    mode === 'view'
+      ? 'Select items on the map'
+      : mode === 'draw-polygon'
+        ? 'Click map to add points'
+        : 'Click map to place markers';
+
   return (
-    <div className="h-screen flex flex-col bg-gray-100">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-gray-800">Map Application</h1>
-        {mode !== 'view' && (
-          <span className="text-sm text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-            {mode === 'draw-polygon' ? 'Drawing Polygon' : 'Placing Object'}
-          </span>
-        )}
+    <div className="min-h-screen flex flex-col">
+      <header className="sticky top-0 z-20 border-b border-slate-200/70 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+        <div className="mx-auto max-w-screen-2xl px-4 py-3 lg:px-6 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-500 shadow-sm ring-1 ring-black/5" />
+            <div className="min-w-0">
+              <h1 className="text-base font-semibold text-slate-900 leading-tight truncate">
+                MapApp
+              </h1>
+              <p className="text-xs text-slate-500 truncate">
+                Draw polygons, place objects, inspect data
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end gap-3">
+            <div className="hidden sm:flex items-center gap-2 rounded-full bg-slate-900/5 px-3 py-1 text-sm text-slate-700 ring-1 ring-inset ring-slate-900/10">
+              <span
+                className={[
+                  'h-2 w-2 rounded-full',
+                  mode === 'view'
+                    ? 'bg-emerald-500'
+                    : mode === 'draw-polygon'
+                      ? 'bg-sky-500'
+                      : 'bg-violet-500',
+                ].join(' ')}
+              />
+              <span className="font-medium">{statusLabel}</span>
+              <span className="text-slate-500">•</span>
+              <span className="text-slate-500">{statusHint}</span>
+            </div>
+
+            <div className="sm:hidden inline-flex items-center gap-2 rounded-full bg-slate-900/5 px-3 py-1 text-sm text-slate-700 ring-1 ring-inset ring-slate-900/10">
+              <span
+                className={[
+                  'h-2 w-2 rounded-full',
+                  mode === 'view'
+                    ? 'bg-emerald-500'
+                    : mode === 'draw-polygon'
+                      ? 'bg-sky-500'
+                      : 'bg-violet-500',
+                ].join(' ')}
+              />
+              <span className="font-medium">{statusLabel}</span>
+            </div>
+          </div>
+        </div>
+        <div className="h-px bg-gradient-to-r from-transparent via-sky-500/30 to-transparent" />
       </header>
 
-      {/* Main content */}
-      <div className="flex-1 flex min-h-0">
-        {/* Map panel - takes remaining space */}
-        <main className="flex-1 min-w-0">
-          <MapView />
-        </main>
+      <main className="flex-1 min-h-0">
+        <div className="mx-auto max-w-screen-2xl px-4 py-4 lg:px-6 lg:py-6 h-full">
+          <div className="grid h-full min-h-0 grid-cols-1 lg:grid-cols-[minmax(0,1fr)_400px] gap-4 lg:gap-6">
+            <section className="min-h-0">
+              <div className="h-full min-h-[360px] rounded-2xl overflow-hidden bg-white/70 backdrop-blur ring-1 ring-inset ring-slate-900/10 shadow-sm">
+                <MapView />
+              </div>
+            </section>
 
-        {/* Side panels */}
-        <aside className="w-80 flex flex-col bg-white border-l border-gray-200 overflow-hidden">
-          <PolygonPanel />
-          <ObjectPanel />
-          <DataTablePanel />
-        </aside>
-      </div>
+            <aside className="min-h-0 flex flex-col gap-4">
+              <PolygonPanel />
+              <ObjectPanel />
+              <DataTablePanel />
+            </aside>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }

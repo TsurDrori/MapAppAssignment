@@ -53,8 +53,7 @@ export function DataTablePanel() {
     return items;
   }, [polygons, objects]);
 
-  const selectedKey =
-    selectedPolygonId ?? selectedObjectId ?? null;
+  const selectedKey = selectedPolygonId ?? selectedObjectId ?? null;
 
   const handleRowClick = (item: TableItem) => {
     if (item.type === 'polygon') {
@@ -71,11 +70,12 @@ export function DataTablePanel() {
       width: '30%',
       render: (item: TableItem) => (
         <span
-          className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+          className={[
+            'inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset',
             item.type === 'polygon'
-              ? 'bg-blue-100 text-blue-800'
-              : 'bg-green-100 text-green-800'
-          }`}
+              ? 'bg-sky-500/10 text-sky-700 ring-sky-600/20'
+              : 'bg-emerald-500/10 text-emerald-700 ring-emerald-600/20',
+          ].join(' ')}
         >
           {item.objectType}
         </span>
@@ -96,20 +96,29 @@ export function DataTablePanel() {
   ];
 
   return (
-    <Panel title="Map Data" className="flex-1 flex flex-col min-h-0">
+    <Panel
+      title="Map Data"
+      description="Click a row to select and highlight on the map"
+      className="flex-1 flex flex-col min-h-0"
+      contentClassName="flex flex-1 flex-col min-h-0"
+    >
       {isLoading ? (
-        <div className="flex items-center justify-center py-8 text-gray-500 text-sm">
-          Loading...
+        <div className="flex flex-1 items-center justify-center py-8 text-sm text-slate-600">
+          Loading…
         </div>
       ) : (
-        <Table
-          columns={columns}
-          data={tableData}
-          keyExtractor={(item) => item.id}
-          onRowClick={handleRowClick}
-          selectedKey={selectedKey}
-          emptyMessage="No map data yet. Add polygons or objects to see them here."
-        />
+        <div className="flex-1 min-h-0">
+          <Table
+            columns={columns}
+            data={tableData}
+            keyExtractor={(item) => item.id}
+            onRowClick={handleRowClick}
+            selectedKey={selectedKey}
+            emptyMessage="No map data yet. Add polygons or objects to see them here."
+            className="h-full"
+            scrollAreaClassName="h-full min-h-0"
+          />
+        </div>
       )}
     </Panel>
   );

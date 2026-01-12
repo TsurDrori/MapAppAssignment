@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { Button } from '@/components/ui/Button';
 
 interface Props {
   children: ReactNode;
@@ -31,20 +32,34 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="flex items-center justify-center h-full p-8">
-          <div className="text-center">
-            <h2 className="text-xl font-semibold text-red-600 mb-2">
+        <div className="min-h-screen flex items-center justify-center p-8">
+          <div className="w-full max-w-md rounded-2xl bg-white/70 backdrop-blur shadow-sm ring-1 ring-inset ring-slate-900/10 p-6 text-center">
+            <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-rose-500/10 ring-1 ring-inset ring-rose-600/20">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                className="h-6 w-6 text-rose-700"
+                aria-hidden="true"
+              >
+                <path
+                  d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </div>
+            <h2 className="text-lg font-semibold text-slate-900">
               Something went wrong
             </h2>
-            <p className="text-gray-600 mb-4">
+            <p className="mt-2 text-sm text-slate-600">
               {this.state.error?.message ?? 'An unexpected error occurred'}
             </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              Reload Page
-            </button>
+            <div className="mt-5 flex items-center justify-center">
+              <Button onClick={() => window.location.reload()}>
+                Reload page
+              </Button>
+            </div>
           </div>
         </div>
       );

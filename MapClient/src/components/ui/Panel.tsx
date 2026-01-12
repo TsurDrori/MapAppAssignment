@@ -2,17 +2,34 @@ import type { ReactNode } from 'react';
 
 interface PanelProps {
   title: string;
+  description?: string;
   children: ReactNode;
   className?: string;
+  contentClassName?: string;
 }
 
-export function Panel({ title, children, className = '' }: PanelProps) {
+export function Panel({
+  title,
+  description,
+  children,
+  className = '',
+  contentClassName = '',
+}: PanelProps) {
   return (
-    <div className={`bg-white border-b border-gray-200 ${className}`}>
-      <div className="px-4 py-2 bg-gray-50 border-b border-gray-200">
-        <h2 className="text-sm font-semibold text-gray-700">{title}</h2>
-      </div>
-      <div className="p-4">{children}</div>
-    </div>
+    <section
+      className={[
+        'rounded-2xl bg-white/70 backdrop-blur',
+        'shadow-sm ring-1 ring-inset ring-slate-900/10',
+        className,
+      ].join(' ')}
+    >
+      <header className="px-4 py-3 border-b border-slate-200/60">
+        <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
+        {description ? (
+          <p className="mt-0.5 text-xs text-slate-500">{description}</p>
+        ) : null}
+      </header>
+      <div className={['p-4', contentClassName].join(' ')}>{children}</div>
+    </section>
   );
 }
