@@ -1,4 +1,5 @@
 using MapServer.Domain.Entities;
+using MapServer.Domain.Exceptions;
 using MapServer.Domain.Interfaces;
 using MapServer.Infrastructure.Data;
 using MongoDB.Driver;
@@ -30,8 +31,28 @@ public class PolygonRepository : IPolygonRepository
 
     public async Task<Polygon> CreateAsync(Polygon polygon)
     {
-        await _polygons.InsertOneAsync(polygon);
-        return polygon;
+        try
+        {
+            await _polygons.InsertOneAsync(polygon);
+            return polygon;
+        }
+        catch (MongoWriteException ex) when (IsInvalidGeometryError(ex))
+        {
+            throw new InvalidGeometryException(
+                "Polygon geometry is invalid. Edges must not cross each other (self-intersection).",
+                ex);
+        }
+    }
+
+    private static bool IsInvalidGeometryError(MongoWriteException ex)
+    {
+        // MongoDB error code 16755: Can't extract geo keys (invalid GeoJSON)
+        if (ex.WriteError?.Code == 16755)
+            return true;
+
+        var message = ex.WriteError?.Message ?? string.Empty;
+        return message.Contains("Loop is not valid", StringComparison.OrdinalIgnoreCase)
+            || message.Contains("Can't extract geo keys", StringComparison.OrdinalIgnoreCase);
     }
 
     public async Task<bool> DeleteAsync(string id)

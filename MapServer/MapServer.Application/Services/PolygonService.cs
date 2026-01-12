@@ -1,8 +1,8 @@
 using MapServer.Application.DTOs;
 using MapServer.Application.Interfaces;
 using MapServer.Domain.Entities;
+using MapServer.Domain.Exceptions;
 using MapServer.Domain.Interfaces;
-using MongoDB.Driver;
 using MongoDB.Driver.GeoJsonObjectModel;
 
 namespace MapServer.Application.Services;
@@ -44,16 +44,7 @@ public class PolygonService : IPolygonService
             Geometry = CreateGeoJsonPolygon(coordinates)
         };
 
-        Polygon created;
-        try
-        {
-            created = await _repository.CreateAsync(polygon);
-        }
-        catch (MongoWriteException ex) when (IsMongoInvalidPolygon(ex))
-        {
-            throw new ArgumentException("Polygon edges must not cross (self-intersection detected).");
-        }
-
+        var created = await _repository.CreateAsync(polygon);
         return MapToDto(created);
     }
 
@@ -73,7 +64,7 @@ public class PolygonService : IPolygonService
     {
         if (coordinates.Count < 3)
         {
-            throw new ArgumentException("Polygon must have at least 3 coordinates");
+            throw new ValidationException("Polygon must have at least 3 coordinates");
         }
 
         foreach (var coord in coordinates)
@@ -86,12 +77,12 @@ public class PolygonService : IPolygonService
     {
         if (coord.Latitude < -90 || coord.Latitude > 90)
         {
-            throw new ArgumentException($"Latitude must be between -90 and 90, got {coord.Latitude}");
+            throw new ValidationException($"Latitude must be between -90 and 90, got {coord.Latitude}");
         }
 
         if (coord.Longitude < -180 || coord.Longitude > 180)
         {
-            throw new ArgumentException($"Longitude must be between -180 and 180, got {coord.Longitude}");
+            throw new ValidationException($"Longitude must be between -180 and 180, got {coord.Longitude}");
         }
     }
 
@@ -125,14 +116,14 @@ public class PolygonService : IPolygonService
     {
         if (closedCoordinates.Count < 4)
         {
-            throw new ArgumentException("Polygon must have at least 3 distinct coordinates.");
+            throw new ValidationException("Polygon must have at least 3 distinct coordinates.");
         }
 
         var first = closedCoordinates[0];
         var last = closedCoordinates[^1];
         if (first.Latitude != last.Latitude || first.Longitude != last.Longitude)
         {
-            throw new ArgumentException("Polygon must be closed (first coordinate must equal last).");
+            throw new ValidationException("Polygon must be closed (first coordinate must equal last).");
         }
 
         for (var i = 0; i < closedCoordinates.Count - 1; i++)
@@ -142,7 +133,7 @@ public class PolygonService : IPolygonService
 
             if (PointsEqual(a1, a2))
             {
-                throw new ArgumentException($"Polygon contains a zero-length edge at index {i}.");
+                throw new ValidationException($"Polygon contains a zero-length edge at index {i}.");
             }
 
             for (var j = i + 1; j < closedCoordinates.Count - 1; j++)
@@ -157,18 +148,10 @@ public class PolygonService : IPolygonService
 
                 if (SegmentsIntersect(a1, a2, b1, b2))
                 {
-                    throw new ArgumentException("Polygon edges must not cross (self-intersection detected).");
+                    throw new ValidationException("Polygon edges must not cross (self-intersection detected).");
                 }
             }
         }
-    }
-
-    private static bool IsMongoInvalidPolygon(MongoWriteException ex)
-    {
-        var message = ex.WriteError?.Message ?? string.Empty;
-        return message.Contains("Loop is not valid", StringComparison.OrdinalIgnoreCase)
-            || message.Contains("Can't extract geo keys", StringComparison.OrdinalIgnoreCase)
-            || ex.WriteError?.Code == 16755;
     }
 
     private readonly record struct Point(double X, double Y);

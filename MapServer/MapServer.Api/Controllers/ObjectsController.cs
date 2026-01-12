@@ -54,20 +54,8 @@ public class ObjectsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<MapObjectDto>> Create(CreateMapObjectRequest request)
     {
-        try
-        {
-            var created = await _mapObjectService.CreateAsync(request);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new ProblemDetails
-            {
-                Title = "Validation failed",
-                Status = 400,
-                Detail = ex.Message
-            });
-        }
+        var created = await _mapObjectService.CreateAsync(request);
+        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
     /// <summary>
@@ -76,20 +64,8 @@ public class ObjectsController : ControllerBase
     [HttpPost("batch")]
     public async Task<ActionResult<List<MapObjectDto>>> CreateBatch(BatchCreateMapObjectsRequest request)
     {
-        try
-        {
-            var created = await _mapObjectService.CreateManyAsync(request);
-            return Ok(created);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new ProblemDetails
-            {
-                Title = "Validation failed",
-                Status = 400,
-                Detail = ex.Message
-            });
-        }
+        var created = await _mapObjectService.CreateManyAsync(request);
+        return Ok(created);
     }
 
     /// <summary>

@@ -1,6 +1,7 @@
 using MapServer.Application.DTOs;
 using MapServer.Application.Interfaces;
 using MapServer.Domain.Entities;
+using MapServer.Domain.Exceptions;
 using MapServer.Domain.Interfaces;
 using MongoDB.Driver.GeoJsonObjectModel;
 
@@ -78,12 +79,12 @@ public class MapObjectService : IMapObjectService
     {
         if (coord.Latitude < -90 || coord.Latitude > 90)
         {
-            throw new ArgumentException($"Latitude must be between -90 and 90, got {coord.Latitude}");
+            throw new ValidationException($"Latitude must be between -90 and 90, got {coord.Latitude}");
         }
 
         if (coord.Longitude < -180 || coord.Longitude > 180)
         {
-            throw new ArgumentException($"Longitude must be between -180 and 180, got {coord.Longitude}");
+            throw new ValidationException($"Longitude must be between -180 and 180, got {coord.Longitude}");
         }
     }
 

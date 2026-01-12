@@ -55,20 +55,8 @@ public class PolygonsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<PolygonDto>> Create(CreatePolygonRequest request)
     {
-        try
-        {
-            var created = await _polygonService.CreateAsync(request);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new ProblemDetails
-            {
-                Title = "Validation failed",
-                Status = 400,
-                Detail = ex.Message
-            });
-        }
+        var created = await _polygonService.CreateAsync(request);
+        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
     /// <summary>

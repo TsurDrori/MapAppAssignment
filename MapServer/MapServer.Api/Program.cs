@@ -1,5 +1,6 @@
 using MapServer.Application.Interfaces;
 using MapServer.Application.Services;
+using MapServer.Domain.Exceptions;
 using MapServer.Domain.Interfaces;
 using MapServer.Infrastructure.Configuration;
 using MapServer.Infrastructure.Data;
@@ -45,7 +46,7 @@ builder.Services.AddScoped<IMapObjectService, MapObjectService>();
 
 var app = builder.Build();
 
-// Ensure clients always receive JSON (ProblemDetails) instead of HTML on unhandled exceptions.
+// Exception handling middleware - maps domain exceptions to HTTP responses.
 app.Use(async (context, next) =>
 {
     try
@@ -60,16 +61,25 @@ app.Use(async (context, next) =>
         }
 
         context.Response.Clear();
-        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
         context.Response.ContentType = "application/problem+json";
+
+        var (statusCode, title) = ex switch
+        {
+            EntityNotFoundException => (StatusCodes.Status404NotFound, "Not found"),
+            ValidationException => (StatusCodes.Status400BadRequest, "Validation error"),
+            DomainException => (StatusCodes.Status400BadRequest, "Bad request"),
+            _ => (StatusCodes.Status500InternalServerError, "Server error")
+        };
+
+        context.Response.StatusCode = statusCode;
 
         var problem = new ProblemDetails
         {
-            Title = "Server error",
-            Status = StatusCodes.Status500InternalServerError,
-            Detail = app.Environment.IsDevelopment()
-                ? ex.Message
-                : "An unexpected error occurred."
+            Title = title,
+            Status = statusCode,
+            Detail = statusCode == StatusCodes.Status500InternalServerError && !app.Environment.IsDevelopment()
+                ? "An unexpected error occurred."
+                : ex.Message
         };
 
         problem.Extensions["traceId"] = context.TraceIdentifier;
