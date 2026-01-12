@@ -25,7 +25,7 @@ function AppContent() {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="sticky top-0 z-20 border-b border-slate-200/70 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-        <div className="mx-auto max-w-screen-2xl px-4 py-3 lg:px-6 flex items-center justify-between gap-4">
+        <div className="mx-auto max-w-screen-2xl px-3 py-2 sm:px-4 sm:py-3 lg:px-6 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-500 shadow-sm ring-1 ring-black/5" />
             <div className="min-w-0">
@@ -74,8 +74,8 @@ function AppContent() {
       </header>
 
       <main className="flex-1 min-h-0">
-        <div className="mx-auto max-w-screen-2xl px-4 py-4 lg:px-6 lg:py-6 h-full">
-          <div className="grid h-full min-h-0 grid-cols-1 lg:grid-cols-[minmax(0,1fr)_400px] gap-4 lg:gap-6">
+        <div className="mx-auto max-w-screen-2xl px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-6 h-full">
+          <div className="grid h-full min-h-0 grid-cols-1 min-[600px]:grid-cols-[minmax(336px,1fr)_minmax(220px,240px)] lg:grid-cols-[minmax(336px,1fr)_320px] xl:grid-cols-[minmax(336px,1fr)_348px] gap-4 lg:gap-6">
             <section className="min-h-0">
               <div className="h-full min-h-[360px] rounded-2xl overflow-hidden bg-white/70 backdrop-blur ring-1 ring-inset ring-slate-900/10 shadow-sm">
                 <MapView />

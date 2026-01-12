@@ -23,13 +23,15 @@ export function Panel({
         className,
       ].join(' ')}
     >
-      <header className="px-4 py-3 border-b border-slate-200/60">
+      <header className="px-3 py-2 sm:px-4 sm:py-3 border-b border-slate-200/60">
         <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
         {description ? (
           <p className="mt-0.5 text-xs text-slate-500">{description}</p>
         ) : null}
       </header>
-      <div className={['p-4', contentClassName].join(' ')}>{children}</div>
+      <div className={['p-3 sm:p-4', contentClassName].join(' ')}>
+        {children}
+      </div>
     </section>
   );
 }
