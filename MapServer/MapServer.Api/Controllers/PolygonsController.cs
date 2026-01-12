@@ -1,0 +1,104 @@
+using MapServer.Application.DTOs;
+using MapServer.Application.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+
+namespace MapServer.Api.Controllers;
+
+/// <summary>
+/// HTTP endpoint handler for polygon operations.
+/// </summary>
+[ApiController]
+[Route("api/[controller]")]
+public class PolygonsController : ControllerBase
+{
+    private readonly IPolygonService _polygonService;
+
+    public PolygonsController(IPolygonService polygonService)
+    {
+        _polygonService = polygonService;
+    }
+
+    /// <summary>
+    /// Get all polygons.
+    /// </summary>
+    [HttpGet]
+    public async Task<ActionResult<List<PolygonDto>>> GetAll()
+    {
+        var polygons = await _polygonService.GetAllAsync();
+        return Ok(polygons);
+    }
+
+    /// <summary>
+    /// Get one polygon by ID.
+    /// </summary>
+    [HttpGet("{id}")]
+    public async Task<ActionResult<PolygonDto>> GetById(string id)
+    {
+        var polygon = await _polygonService.GetByIdAsync(id);
+
+        if (polygon == null)
+        {
+            return NotFound(new ProblemDetails
+            {
+                Title = "Polygon not found",
+                Status = 404,
+                Detail = $"Polygon with ID '{id}' was not found"
+            });
+        }
+
+        return Ok(polygon);
+    }
+
+    /// <summary>
+    /// Create a new polygon.
+    /// </summary>
+    [HttpPost]
+    public async Task<ActionResult<PolygonDto>> Create(CreatePolygonRequest request)
+    {
+        try
+        {
+            var created = await _polygonService.CreateAsync(request);
+            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Title = "Validation failed",
+                Status = 400,
+                Detail = ex.Message
+            });
+        }
+    }
+
+    /// <summary>
+    /// Delete one polygon by ID.
+    /// </summary>
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(string id)
+    {
+        var deleted = await _polygonService.DeleteAsync(id);
+
+        if (!deleted)
+        {
+            return NotFound(new ProblemDetails
+            {
+                Title = "Polygon not found",
+                Status = 404,
+                Detail = $"Polygon with ID '{id}' was not found"
+            });
+        }
+
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Delete all polygons.
+    /// </summary>
+    [HttpDelete]
+    public async Task<IActionResult> DeleteAll()
+    {
+        await _polygonService.DeleteAllAsync();
+        return NoContent();
+    }
+}

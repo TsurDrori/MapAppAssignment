@@ -1,3 +1,6 @@
 <Solution>
-  <Project Path="MapServer.csproj" />
+  <Project Path="MapServer.Domain/MapServer.Domain.csproj" />
+  <Project Path="MapServer.Infrastructure/MapServer.Infrastructure.csproj" />
+  <Project Path="MapServer.Application/MapServer.Application.csproj" />
+  <Project Path="MapServer.Api/MapServer.Api.csproj" />
 </Solution>

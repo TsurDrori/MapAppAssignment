@@ -35,17 +35,17 @@ docker run -d --name mapapp-mongodb -p 27017:27017 mongo:latest
 ### Running the Server
 
 ```bash
-# Restore packages
-dotnet restore
+dotnet restore     # Restore packages (first time only)
+./build            # Build all projects
+./run              # Run (development mode)
+./watch            # Run with hot reload
+```
 
-# Build
-dotnet build
-
-# Run (development mode)
-dotnet run
-
-# Run with HTTPS profile
-dotnet run --launch-profile https
+Or use the full commands:
+```bash
+dotnet build MapServer.slnx
+dotnet run --project MapServer.Api
+dotnet run --project MapServer.Api --launch-profile https  # HTTPS
 ```
 
 The server will be available at:
@@ -115,20 +115,45 @@ curl -X POST http://localhost:5102/api/objects \
 
 ## Project Structure
 
+Clean Architecture with multi-project solution:
+
 ```
 MapServer/
-├── Controllers/        # API endpoints (thin - routing only)
-├── Services/          # Business logic + validation
-├── Repositories/      # Data access layer
-├── Models/            # Domain entities (MongoDB documents)
-├── DTOs/              # API request/response objects
-├── Data/              # MongoDB context
-└── Configuration/     # Settings classes
+├── MapServer.slnx                    # Solution file (XML format)
+├── docker-compose.yml                # MongoDB container
+├── MapServer.http                    # API testing file
+│
+├── MapServer.Api/                    # Presentation Layer
+│   ├── Controllers/                  # HTTP endpoint handlers
+│   ├── Program.cs                    # Entry point, DI configuration
+│   └── appsettings.json              # Configuration
+│
+├── MapServer.Application/            # Application Layer (Use Cases)
+│   ├── DTOs/                         # Request/Response objects
+│   ├── Interfaces/                   # Service interfaces
+│   └── Services/                     # Business logic + validation
+│
+├── MapServer.Domain/                 # Domain Layer (Core)
+│   ├── Entities/                     # MongoDB document models
+│   └── Interfaces/                   # Repository interfaces
+│
+└── MapServer.Infrastructure/         # Infrastructure Layer
+    ├── Data/                         # MongoDbContext
+    ├── Configuration/                # MongoDbSettings
+    └── Repositories/                 # Repository implementations
 ```
+
+### Project Dependencies
+
+Following Dependency Inversion Principle:
+- **Api** → Application, Infrastructure (for DI wiring)
+- **Application** → Domain (business logic uses domain abstractions)
+- **Infrastructure** → Domain (implements repository interfaces)
+- **Domain** → No dependencies (core layer)
 
 ## Configuration
 
-MongoDB settings are in [appsettings.json](appsettings.json):
+MongoDB settings are in [MapServer.Api/appsettings.json](MapServer.Api/appsettings.json):
 
 ```json
 {
@@ -191,6 +216,7 @@ MongoDB settings are in [appsettings.json](appsettings.json):
 ## Validation Rules
 
 - **Polygons**: Minimum 3 coordinates (auto-closed by server if needed)
+- **Polygons**: Must be a valid GeoJSON loop (no self-intersections / crossing edges)
 - **Coordinates**:
   - Latitude: -90 to 90
   - Longitude: -180 to 180
@@ -226,9 +252,9 @@ exit
 ### Rebuilding
 
 ```bash
-dotnet clean
+dotnet clean MapServer.slnx
 dotnet restore
-dotnet build
+./build
 ```
 
 ## Troubleshooting
@@ -239,9 +265,9 @@ dotnet build
 - Ensure port 27017 is not blocked
 
 ### Port Already in Use
-- Change ports in [Properties/launchSettings.json](Properties/launchSettings.json)
+- Change ports in [MapServer.Api/Properties/launchSettings.json](MapServer.Api/Properties/launchSettings.json)
 - Update `@MapServer_HostAddress` in [MapServer.http](MapServer.http)
 
 ### CORS Errors from React
-- Verify React app port in [Program.cs](Program.cs#L17-L25)
+- Verify React app port in [MapServer.Api/Program.cs](MapServer.Api/Program.cs)
 - Check that `UseCors` is called before `MapControllers`

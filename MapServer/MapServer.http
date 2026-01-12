@@ -67,6 +67,20 @@ Content-Type: application/json
   ]
 }
 
+### Create polygon - Invalid (self-intersecting / crossing edges) - Should fail
+POST {{MapServer_HostAddress}}/api/polygons
+Content-Type: application/json
+
+{
+  "coordinates": [
+    { "latitude": 32.10, "longitude": 34.80 },
+    { "latitude": 32.12, "longitude": 34.81 },
+    { "latitude": 32.09, "longitude": 34.82 },
+    { "latitude": 32.12, "longitude": 34.83 },
+    { "latitude": 32.10, "longitude": 34.84 }
+  ]
+}
+
 ### Delete polygon by ID
 DELETE {{MapServer_HostAddress}}/api/polygons/{{polygonId}}
 

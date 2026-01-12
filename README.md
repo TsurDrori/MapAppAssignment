@@ -42,15 +42,18 @@ cd MapServer
 docker compose up -d
 ```
 
-Or connect to an existing MongoDB instance by updating `MapServer/appsettings.json`.
+Or connect to an existing MongoDB instance by updating `MapServer/MapServer.Api/appsettings.json`.
 
 ### 3. Run the Backend
 
 ```bash
 cd MapServer
 dotnet restore
-dotnet run
+./build
+./run
 ```
+
+Or with hot reload: `./watch`
 
 The API will be available at `http://localhost:5102`.
 
@@ -68,20 +71,20 @@ The application will be available at `http://localhost:5173`.
 
 ```
 MapApp/
-├── MapClient/          # React frontend
+├── MapClient/                    # React frontend
 │   ├── src/
-│   │   ├── api/        # API client and endpoints
-│   │   ├── components/ # Reusable UI components
-│   │   ├── context/    # React context (MapContext)
-│   │   ├── features/   # Feature modules (map, polygons, objects)
-│   │   └── types/      # TypeScript types
+│   │   ├── api/                  # API client and endpoints
+│   │   ├── components/           # Reusable UI components
+│   │   ├── context/              # React context (MapContext)
+│   │   ├── features/             # Feature modules (map, polygons, objects)
+│   │   └── types/                # TypeScript types
 │   └── ...
-├── MapServer/          # ASP.NET Core backend
-│   ├── Controllers/    # API endpoints
-│   ├── Services/       # Business logic
-│   ├── Repositories/   # Data access layer
-│   ├── Models/         # MongoDB document models
-│   ├── DTOs/           # Request/response objects
+├── MapServer/                    # ASP.NET Core backend (Clean Architecture)
+│   ├── MapServer.slnx            # Solution file
+│   ├── MapServer.Api/            # Presentation layer (Controllers, Program.cs)
+│   ├── MapServer.Application/    # Application layer (Services, DTOs)
+│   ├── MapServer.Domain/         # Domain layer (Entities, Repository interfaces)
+│   ├── MapServer.Infrastructure/ # Infrastructure layer (Repositories, DbContext)
 │   └── ...
 └── README.md
 ```
@@ -122,15 +125,16 @@ MapApp/
 
 ### Backend (MapServer)
 
-| Command          | Description          |
-| ---------------- | -------------------- |
-| `dotnet run`     | Run the server       |
-| `dotnet build`   | Build the project    |
-| `dotnet restore` | Restore dependencies |
+| Command          | Description              |
+| ---------------- | ------------------------ |
+| `./run`          | Run the server           |
+| `./build`        | Build all projects       |
+| `./watch`        | Run with hot reload      |
+| `dotnet restore` | Restore dependencies     |
 
 ## Configuration
 
-### Backend (appsettings.json)
+### Backend (MapServer.Api/appsettings.json)
 
 ```json
 {
@@ -151,18 +155,25 @@ The Vite dev server proxies `/api` requests to `http://localhost:5102`. This can
 
 ### Backend Architecture
 
-The server follows **Clean Architecture** with explicit separation of concerns:
+The server follows **Clean Architecture** with a multi-project solution structure:
 
-| Layer        | Responsibility                                  |
-| ------------ | ----------------------------------------------- |
-| Controllers  | HTTP routing only (thin controllers)            |
-| Services     | Business logic, validation, DTO ↔ Model mapping |
-| Repositories | Data access, MongoDB operations                 |
-| DTOs         | API contracts (request/response objects)        |
-| Models       | Database document entities                      |
+| Project        | Layer          | Responsibility                                  |
+| -------------- | -------------- | ----------------------------------------------- |
+| MapServer.Api  | Presentation   | HTTP routing, DI configuration (thin controllers) |
+| MapServer.Application | Application | Business logic, validation, DTOs |
+| MapServer.Domain | Domain       | Entities, repository interfaces (core abstractions) |
+| MapServer.Infrastructure | Infrastructure | Data access, MongoDB operations |
+
+**Project Dependencies (Dependency Inversion Principle):**
+- Api → Application, Infrastructure
+- Application → Domain
+- Infrastructure → Domain
+- Domain → No dependencies
 
 **Key Design Choices:**
 
+- **Multi-project solution** - enforces architectural boundaries at compile time
+- **Repository interfaces in Domain** - Application depends on abstractions, not implementations
 - **Explicit repository interfaces** per entity rather than generic `IRepository<T>` - allows entity-specific methods like geo queries
 - **Service-level validation** - keeps validation visible and simple for this project scope
 - **DTO pattern** - separates API contracts from database models, making the API database-agnostic
