@@ -6,6 +6,7 @@ namespace MapServer.Api.Controllers;
 
 /// <summary>
 /// HTTP endpoint handler for map object operations.
+/// Thin controller - all business logic in services, all error handling in middleware.
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
@@ -35,16 +36,6 @@ public class ObjectsController : ControllerBase
     public async Task<ActionResult<MapObjectDto>> GetById(string id)
     {
         var obj = await _mapObjectService.GetByIdAsync(id);
-        if (obj == null)
-        {
-            return NotFound(new ProblemDetails
-            {
-                Title = "Object not found",
-                Status = 404,
-                Detail = $"Object with ID '{id}' was not found"
-            });
-        }
-
         return Ok(obj);
     }
 
@@ -74,17 +65,7 @@ public class ObjectsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
     {
-        var deleted = await _mapObjectService.DeleteAsync(id);
-        if (!deleted)
-        {
-            return NotFound(new ProblemDetails
-            {
-                Title = "Object not found",
-                Status = 404,
-                Detail = $"Object with ID '{id}' was not found"
-            });
-        }
-
+        await _mapObjectService.DeleteAsync(id);
         return NoContent();
     }
 

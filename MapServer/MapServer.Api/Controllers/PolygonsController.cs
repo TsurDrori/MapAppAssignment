@@ -6,6 +6,7 @@ namespace MapServer.Api.Controllers;
 
 /// <summary>
 /// HTTP endpoint handler for polygon operations.
+/// Thin controller - all business logic in services, all error handling in middleware.
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
@@ -24,7 +25,7 @@ public class PolygonsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<PolygonDto>>> GetAll()
     {
-        var polygons = await _polygonService.GetAllAsync();
+        var polygons = await _polygonService.GetAllAsync();//CHECK
         return Ok(polygons);
     }
 
@@ -35,17 +36,6 @@ public class PolygonsController : ControllerBase
     public async Task<ActionResult<PolygonDto>> GetById(string id)
     {
         var polygon = await _polygonService.GetByIdAsync(id);
-
-        if (polygon == null)
-        {
-            return NotFound(new ProblemDetails
-            {
-                Title = "Polygon not found",
-                Status = 404,
-                Detail = $"Polygon with ID '{id}' was not found"
-            });
-        }
-
         return Ok(polygon);
     }
 
@@ -65,18 +55,7 @@ public class PolygonsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
     {
-        var deleted = await _polygonService.DeleteAsync(id);
-
-        if (!deleted)
-        {
-            return NotFound(new ProblemDetails
-            {
-                Title = "Polygon not found",
-                Status = 404,
-                Detail = $"Polygon with ID '{id}' was not found"
-            });
-        }
-
+        await _polygonService.DeleteAsync(id);
         return NoContent();
     }
 

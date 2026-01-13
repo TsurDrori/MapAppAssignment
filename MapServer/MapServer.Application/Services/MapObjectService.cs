@@ -1,6 +1,7 @@
 using MapServer.Application.DTOs;
 using MapServer.Application.Interfaces;
 using MapServer.Domain.Entities;
+using MapServer.Domain.Exceptions;
 using MapServer.Domain.Interfaces;
 using MongoDB.Driver.GeoJsonObjectModel;
 
@@ -21,14 +22,17 @@ public class MapObjectService : IMapObjectService
 
     public async Task<List<MapObjectDto>> GetAllAsync()
     {
+
         var objects = await _repository.GetAllAsync();
         return objects.Select(MapToDto).ToList();
     }
 
-    public async Task<MapObjectDto?> GetByIdAsync(string id)
+    public async Task<MapObjectDto> GetByIdAsync(string id)
     {
         var obj = await _repository.GetByIdAsync(id);
-        return obj == null ? null : MapToDto(obj);
+        if (obj == null)
+            throw new EntityNotFoundException("MapObject", id);
+        return MapToDto(obj);
     }
 
     public async Task<MapObjectDto> CreateAsync(CreateMapObjectRequest request)
@@ -55,9 +59,11 @@ public class MapObjectService : IMapObjectService
         return created.Select(MapToDto).ToList();
     }
 
-    public async Task<bool> DeleteAsync(string id)
+    public async Task DeleteAsync(string id)
     {
-        return await _repository.DeleteAsync(id);
+        var deleted = await _repository.DeleteAsync(id);
+        if (!deleted)
+            throw new EntityNotFoundException("MapObject", id);
     }
 
     public async Task DeleteAllAsync()
