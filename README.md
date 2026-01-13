@@ -57,6 +57,8 @@ Or with hot reload: `./watch`
 
 The API will be available at `http://localhost:5102`.
 
+Swagger UI is available at `http://localhost:5102/swagger` in development mode.
+
 ### 4. Run the Frontend
 
 ```bash
@@ -96,7 +98,17 @@ MapApp/
 - **View Data**: See all polygons and objects in the data table panel
 - **Delete Items**: Remove individual items or clear all data
 
-## API Endpoints
+## API Documentation
+
+Interactive API documentation is available via **Swagger UI** at:
+
+```
+http://localhost:5102/swagger
+```
+
+This provides a full interactive interface to explore and test all API endpoints.
+
+### Endpoints Summary
 
 | Method | Endpoint             | Description             |
 | ------ | -------------------- | ----------------------- |
@@ -104,13 +116,11 @@ MapApp/
 | GET    | `/api/polygons/{id}` | Get polygon by ID       |
 | POST   | `/api/polygons`      | Create polygon          |
 | DELETE | `/api/polygons/{id}` | Delete polygon          |
-| DELETE | `/api/polygons`      | Delete all polygons     |
 | GET    | `/api/objects`       | Get all map objects     |
 | GET    | `/api/objects/{id}`  | Get object by ID        |
 | POST   | `/api/objects`       | Create single object    |
 | POST   | `/api/objects/batch` | Create multiple objects |
 | DELETE | `/api/objects/{id}`  | Delete object           |
-| DELETE | `/api/objects`       | Delete all objects      |
 
 ## Available Scripts
 
