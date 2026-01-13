@@ -52,11 +52,6 @@ public class PolygonService : IPolygonService
             throw new EntityNotFoundException("Polygon", id);
     }
 
-    public async Task DeleteAllAsync()
-    {
-        await _repository.DeleteAllAsync();
-    }
-
     #region Private Helpers
 
     private static GeoJsonPolygon<GeoJson2DGeographicCoordinates> CreateGeoJsonPolygon(List<Coordinate> coordinates)

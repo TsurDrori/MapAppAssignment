@@ -68,14 +68,4 @@ public class ObjectsController : ControllerBase
         await _mapObjectService.DeleteAsync(id);
         return NoContent();
     }
-
-    /// <summary>
-    /// Delete all map objects.
-    /// </summary>
-    [HttpDelete]
-    public async Task<IActionResult> DeleteAll()
-    {
-        await _mapObjectService.DeleteAllAsync();
-        return NoContent();
-    }
 }

@@ -58,14 +58,4 @@ public class PolygonsController : ControllerBase
         await _polygonService.DeleteAsync(id);
         return NoContent();
     }
-
-    /// <summary>
-    /// Delete all polygons.
-    /// </summary>
-    [HttpDelete]
-    public async Task<IActionResult> DeleteAll()
-    {
-        await _polygonService.DeleteAllAsync();
-        return NoContent();
-    }
 }

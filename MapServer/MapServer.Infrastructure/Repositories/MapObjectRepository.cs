@@ -46,9 +46,4 @@ public class MapObjectRepository : IMapObjectRepository
         var result = await _mapObjects.DeleteOneAsync(o => o.Id == id);
         return result.DeletedCount > 0;
     }
-
-    public async Task DeleteAllAsync()
-    {
-        await _mapObjects.DeleteManyAsync(_ => true);
-    }
 }

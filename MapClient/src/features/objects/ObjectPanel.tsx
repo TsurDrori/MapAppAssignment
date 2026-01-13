@@ -6,7 +6,6 @@ import { getErrorMessage } from '@/utils/errors';
 import {
   useCreateObjectsBatch,
   useDeleteObject,
-  useDeleteAllObjects,
 } from './hooks/useObjects';
 
 export function ObjectPanel() {
@@ -25,9 +24,6 @@ export function ObjectPanel() {
     },
   });
   const deleteObject = useDeleteObject({
-    onSuccess: () => dispatch({ type: 'SELECT_OBJECT', payload: null }),
-  });
-  const deleteAllObjects = useDeleteAllObjects({
     onSuccess: () => dispatch({ type: 'SELECT_OBJECT', payload: null }),
   });
 
@@ -57,12 +53,6 @@ export function ObjectPanel() {
   const handleDeleteSelected = () => {
     if (!selectedObjectId) return;
     deleteObject.mutate(selectedObjectId);
-  };
-
-  const handleDeleteAll = () => {
-    if (confirm('Are you sure you want to delete all objects?')) {
-      deleteAllObjects.mutate();
-    }
   };
 
   // Inline error for create mutation
@@ -154,15 +144,6 @@ export function ObjectPanel() {
             isLoading={deleteObject.isPending}
           >
             Delete Selected
-          </Button>
-
-          <Button
-            variant="danger"
-            onClick={handleDeleteAll}
-            disabled={isPlacing}
-            isLoading={deleteAllObjects.isPending}
-          >
-            Delete All
           </Button>
         </div>
 

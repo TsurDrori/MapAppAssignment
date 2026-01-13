@@ -7,7 +7,6 @@ import { getErrorMessage } from '@/utils/errors';
 import {
   useCreatePolygon,
   useDeletePolygon,
-  useDeleteAllPolygons,
 } from './hooks/usePolygons';
 
 export function PolygonPanel() {
@@ -20,9 +19,6 @@ export function PolygonPanel() {
     onSuccess: () => dispatch({ type: 'EXIT_DRAW_MODE' }),
   });
   const deletePolygon = useDeletePolygon({
-    onSuccess: () => dispatch({ type: 'SELECT_POLYGON', payload: null }),
-  });
-  const deleteAllPolygons = useDeleteAllPolygons({
     onSuccess: () => dispatch({ type: 'SELECT_POLYGON', payload: null }),
   });
 
@@ -65,12 +61,6 @@ export function PolygonPanel() {
   const handleDeleteSelected = () => {
     if (!selectedPolygonId) return;
     deletePolygon.mutate(selectedPolygonId);
-  };
-
-  const handleDeleteAll = () => {
-    if (confirm('Are you sure you want to delete all polygons?')) {
-      deleteAllPolygons.mutate();
-    }
   };
 
   return (
@@ -150,15 +140,6 @@ export function PolygonPanel() {
             isLoading={deletePolygon.isPending}
           >
             Delete Selected
-          </Button>
-
-          <Button
-            variant="danger"
-            onClick={handleDeleteAll}
-            disabled={isDrawing}
-            isLoading={deleteAllPolygons.isPending}
-          >
-            Delete All
           </Button>
         </div>
 

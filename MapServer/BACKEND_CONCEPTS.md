@@ -1997,10 +1997,6 @@ public class PolygonsController : ControllerBase
     // DELETE /api/polygons/abc123
     [HttpDelete("{id}")]
     public IActionResult Delete(string id) { }
-
-    // DELETE /api/polygons
-    [HttpDelete]
-    public IActionResult DeleteAll() { }
 }
 ```
 

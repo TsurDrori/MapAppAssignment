@@ -85,24 +85,3 @@ export function useDeleteObject(options?: DeleteObjectOptions) {
     },
   });
 }
-
-interface DeleteAllObjectsOptions {
-  onSuccess?: () => void;
-}
-
-export function useDeleteAllObjects(options?: DeleteAllObjectsOptions) {
-  const queryClient = useQueryClient();
-  const toast = useToastActions();
-
-  return useMutation({
-    mutationFn: () => objectApi.deleteAll(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: OBJECTS_QUERY_KEY });
-      toast.success('All objects deleted');
-      options?.onSuccess?.();
-    },
-    onError: (error) => {
-      toast.error(getErrorMessage(error, 'Failed to delete objects'));
-    },
-  });
-}

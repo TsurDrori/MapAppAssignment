@@ -9,6 +9,4 @@ export const polygonApi = {
   create: (data: CreatePolygonRequest) => api.post<Polygon>('/api/polygons', data),
 
   delete: (id: string) => api.delete(`/api/polygons/${id}`),
-
-  deleteAll: () => api.delete('/api/polygons'),
 };

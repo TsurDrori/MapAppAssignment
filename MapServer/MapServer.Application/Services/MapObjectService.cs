@@ -66,11 +66,6 @@ public class MapObjectService : IMapObjectService
             throw new EntityNotFoundException("MapObject", id);
     }
 
-    public async Task DeleteAllAsync()
-    {
-        await _repository.DeleteAllAsync();
-    }
-
     #region Private Helpers
 
     private static GeoJsonPoint<GeoJson2DGeographicCoordinates> CreateGeoJsonPoint(Coordinate coord)

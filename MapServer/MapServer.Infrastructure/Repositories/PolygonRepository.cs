@@ -39,9 +39,4 @@ public class PolygonRepository : IPolygonRepository
         var result = await _polygons.DeleteOneAsync(p => p.Id == id);
         return result.DeletedCount > 0;
     }
-
-    public async Task DeleteAllAsync()
-    {
-        await _polygons.DeleteManyAsync(_ => true);
-    }
 }

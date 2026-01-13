@@ -1562,7 +1562,6 @@ public interface IRepository<T> where T : class {
     Task<T> CreateAsync(T entity);
     Task UpdateAsync(string id, T entity);
     Task DeleteAsync(string id);
-    Task DeleteAllAsync();
 }
 
 // Single implementation for all entities
@@ -1618,7 +1617,6 @@ public interface IPolygonRepository {
     Task<List<Polygon>> GetAllAsync();
     Task<Polygon> CreateAsync(List<Coordinate> coordinates);
     Task DeleteAsync(string id);
-    Task DeleteAllAsync();
 
     // Polygon-specific geo query
     Task<List<Polygon>> FindPolygonsContainingPointAsync(double latitude, double longitude);
@@ -1631,7 +1629,6 @@ public interface IMapObjectRepository {
     Task<MapObject> CreateAsync(Coordinate location, string objectType);
     Task<List<MapObject>> CreateBatchAsync(List<(Coordinate location, string type)> objects);
     Task DeleteAsync(string id);
-    Task DeleteAllAsync();
 
     // Object-specific query
     Task<List<MapObject>> GetByTypeAsync(string objectType);
@@ -1671,7 +1668,6 @@ public interface IRepository<T> where T : class {
     Task<T> GetByIdAsync(string id);
     Task<List<T>> GetAllAsync();
     Task DeleteAsync(string id);
-    Task DeleteAllAsync();
 }
 
 // Specialized interfaces extend base

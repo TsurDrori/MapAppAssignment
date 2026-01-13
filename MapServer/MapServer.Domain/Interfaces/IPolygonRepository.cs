@@ -33,9 +33,4 @@ public interface IPolygonRepository
     /// <param name="id">The MongoDB ObjectId as a string.</param>
     /// <returns>True if deleted, false if not found.</returns>
     Task<bool> DeleteAsync(string id);
-
-    /// <summary>
-    /// Delete all polygons from the database.
-    /// </summary>
-    Task DeleteAllAsync();
 }

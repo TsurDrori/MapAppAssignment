@@ -34,9 +34,4 @@ public interface IMapObjectService
     /// </summary>
     /// <exception cref="EntityNotFoundException">Thrown if object not found.</exception>
     Task DeleteAsync(string id);
-
-    /// <summary>
-    /// Delete all map objects.
-    /// </summary>
-    Task DeleteAllAsync();
 }

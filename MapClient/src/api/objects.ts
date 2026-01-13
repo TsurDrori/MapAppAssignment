@@ -16,6 +16,4 @@ export const objectApi = {
     api.post<MapObject[]>('/api/objects/batch', data),
 
   delete: (id: string) => api.delete(`/api/objects/${id}`),
-
-  deleteAll: () => api.delete('/api/objects'),
 };

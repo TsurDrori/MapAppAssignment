@@ -30,9 +30,4 @@ public interface IPolygonService
     /// </summary>
     /// <exception cref="EntityNotFoundException">Thrown if polygon not found.</exception>
     Task DeleteAsync(string id);
-
-    /// <summary>
-    /// Delete all polygons.
-    /// </summary>
-    Task DeleteAllAsync();
 }

@@ -61,24 +61,3 @@ export function useDeletePolygon(options?: DeletePolygonOptions) {
     },
   });
 }
-
-interface DeleteAllPolygonsOptions {
-  onSuccess?: () => void;
-}
-
-export function useDeleteAllPolygons(options?: DeleteAllPolygonsOptions) {
-  const queryClient = useQueryClient();
-  const toast = useToastActions();
-
-  return useMutation({
-    mutationFn: () => polygonApi.deleteAll(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: POLYGONS_QUERY_KEY });
-      toast.success('All polygons deleted');
-      options?.onSuccess?.();
-    },
-    onError: (error) => {
-      toast.error(getErrorMessage(error, 'Failed to delete polygons'));
-    },
-  });
-}
