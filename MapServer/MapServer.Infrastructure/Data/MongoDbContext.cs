@@ -1,5 +1,5 @@
-using MapServer.Domain.Entities;
 using MapServer.Infrastructure.Configuration;
+using MapServer.Infrastructure.Documents;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
@@ -18,8 +18,8 @@ public class MongoDbContext
         var client = new MongoClient(settings.Value.ConnectionString);
         _database = client.GetDatabase(settings.Value.DatabaseName);
 
-        Polygons = _database.GetCollection<Polygon>(settings.Value.PolygonsCollectionName);
-        MapObjects = _database.GetCollection<MapObject>(settings.Value.ObjectsCollectionName);
+        Polygons = _database.GetCollection<PolygonDocument>(settings.Value.PolygonsCollectionName);
+        MapObjects = _database.GetCollection<MapObjectDocument>(settings.Value.ObjectsCollectionName);
 
         CreateIndexes();
     }
@@ -27,22 +27,22 @@ public class MongoDbContext
     /// <summary>
     /// The polygons collection.
     /// </summary>
-    public IMongoCollection<Polygon> Polygons { get; }
+    public IMongoCollection<PolygonDocument> Polygons { get; }
 
     /// <summary>
     /// The map objects collection.
     /// </summary>
-    public IMongoCollection<MapObject> MapObjects { get; }
+    public IMongoCollection<MapObjectDocument> MapObjects { get; }
 
     /// <summary>
     /// Creates 2dsphere indexes for efficient geographic queries.
     /// </summary>
     private void CreateIndexes()
     {
-        var polygonIndexKeys = Builders<Polygon>.IndexKeys.Geo2DSphere(p => p.Geometry);
-        Polygons.Indexes.CreateOne(new CreateIndexModel<Polygon>(polygonIndexKeys));
+        var polygonIndexKeys = Builders<PolygonDocument>.IndexKeys.Geo2DSphere(p => p.Geometry);
+        Polygons.Indexes.CreateOne(new CreateIndexModel<PolygonDocument>(polygonIndexKeys));
 
-        var objectIndexKeys = Builders<MapObject>.IndexKeys.Geo2DSphere(o => o.Location);
-        MapObjects.Indexes.CreateOne(new CreateIndexModel<MapObject>(objectIndexKeys));
+        var objectIndexKeys = Builders<MapObjectDocument>.IndexKeys.Geo2DSphere(o => o.Location);
+        MapObjects.Indexes.CreateOne(new CreateIndexModel<MapObjectDocument>(objectIndexKeys));
     }
 }

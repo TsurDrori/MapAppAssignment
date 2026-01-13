@@ -1,17 +1,19 @@
+using MapServer.Application.Interfaces;
 using MapServer.Domain.Entities;
-using MapServer.Domain.Interfaces;
 using MapServer.Infrastructure.Data;
+using MapServer.Infrastructure.Documents;
+using MapServer.Infrastructure.Mapping;
 using MongoDB.Driver;
 
 namespace MapServer.Infrastructure.Repositories;
 
 /// <summary>
 /// MongoDB implementation of IPolygonRepository.
-/// Pure data access - no exception translation.
+/// Maps between domain entities and MongoDB documents.
 /// </summary>
 public class PolygonRepository : IPolygonRepository
 {
-    private readonly IMongoCollection<Polygon> _polygons;
+    private readonly IMongoCollection<PolygonDocument> _polygons;
 
     public PolygonRepository(MongoDbContext context)
     {
@@ -20,17 +22,21 @@ public class PolygonRepository : IPolygonRepository
 
     public async Task<List<Polygon>> GetAllAsync()
     {
-        return await _polygons.Find(_ => true).ToListAsync();
+        var documents = await _polygons.Find(_ => true).ToListAsync();
+        return documents.Select(DocumentMapper.ToDomain).ToList();
     }
 
     public async Task<Polygon?> GetByIdAsync(string id)
     {
-        return await _polygons.Find(p => p.Id == id).FirstOrDefaultAsync();
+        var document = await _polygons.Find(p => p.Id == id).FirstOrDefaultAsync();
+        return document == null ? null : DocumentMapper.ToDomain(document);
     }
 
     public async Task<Polygon> CreateAsync(Polygon polygon)
     {
-        await _polygons.InsertOneAsync(polygon);
+        var document = DocumentMapper.ToDocument(polygon);
+        await _polygons.InsertOneAsync(document);
+        polygon.Id = document.Id;
         return polygon;
     }
 

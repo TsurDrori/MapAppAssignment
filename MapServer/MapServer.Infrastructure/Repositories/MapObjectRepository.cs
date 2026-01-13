@@ -1,17 +1,19 @@
+using MapServer.Application.Interfaces;
 using MapServer.Domain.Entities;
-using MapServer.Domain.Interfaces;
 using MapServer.Infrastructure.Data;
+using MapServer.Infrastructure.Documents;
+using MapServer.Infrastructure.Mapping;
 using MongoDB.Driver;
 
 namespace MapServer.Infrastructure.Repositories;
 
 /// <summary>
 /// MongoDB implementation of IMapObjectRepository.
-/// Pure data access - no exception translation.
+/// Maps between domain entities and MongoDB documents.
 /// </summary>
 public class MapObjectRepository : IMapObjectRepository
 {
-    private readonly IMongoCollection<MapObject> _mapObjects;
+    private readonly IMongoCollection<MapObjectDocument> _mapObjects;
 
     public MapObjectRepository(MongoDbContext context)
     {
@@ -20,24 +22,33 @@ public class MapObjectRepository : IMapObjectRepository
 
     public async Task<List<MapObject>> GetAllAsync()
     {
-        return await _mapObjects.Find(_ => true).ToListAsync();
+        var documents = await _mapObjects.Find(_ => true).ToListAsync();
+        return documents.Select(DocumentMapper.ToDomain).ToList();
     }
 
     public async Task<MapObject?> GetByIdAsync(string id)
     {
-        var res = await _mapObjects.Find(o => o.Id == id).FirstOrDefaultAsync();//check if this is the right function for o
-        return res;
+        var document = await _mapObjects.Find(o => o.Id == id).FirstOrDefaultAsync();
+        return document == null ? null : DocumentMapper.ToDomain(document);
     }
 
     public async Task<MapObject> CreateAsync(MapObject mapObject)
     {
-        await _mapObjects.InsertOneAsync(mapObject);
+        var document = DocumentMapper.ToDocument(mapObject);
+        await _mapObjects.InsertOneAsync(document);
+        mapObject.Id = document.Id;
         return mapObject;
     }
 
     public async Task<List<MapObject>> CreateManyAsync(List<MapObject> mapObjects)
     {
-        await _mapObjects.InsertManyAsync(mapObjects);
+        var documents = mapObjects.Select(DocumentMapper.ToDocument).ToList();
+        await _mapObjects.InsertManyAsync(documents);
+
+        for (int i = 0; i < mapObjects.Count; i++)
+        {
+            mapObjects[i].Id = documents[i].Id;
+        }
         return mapObjects;
     }
 

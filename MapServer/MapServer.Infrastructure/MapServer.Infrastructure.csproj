@@ -12,7 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MapServer.Domain\MapServer.Domain.csproj" />
+    <!-- Reference Application for repository interfaces (ports) -->
+    <ProjectReference Include="..\MapServer.Application\MapServer.Application.csproj" />
   </ItemGroup>
 
 </Project>

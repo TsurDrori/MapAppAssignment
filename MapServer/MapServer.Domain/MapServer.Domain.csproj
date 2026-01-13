@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!--
+      MongoDB.Driver is included ONLY for GeoJSON types (GeoJsonPolygon, GeoJsonPoint).
+      GeoJSON is an open standard (RFC 7946) representing domain knowledge, not persistence.
+      BSON serialization attributes are NOT used here - they belong in Infrastructure.
+    -->
     <PackageReference Include="MongoDB.Driver" Version="3.5.2" />
   </ItemGroup>
 

@@ -1,7 +1,6 @@
 using MapServer.Api.Middleware;
 using MapServer.Application.Interfaces;
 using MapServer.Application.Services;
-using MapServer.Domain.Interfaces;
 using MapServer.Infrastructure.Configuration;
 using MapServer.Infrastructure.Data;
 using MapServer.Infrastructure.Repositories;

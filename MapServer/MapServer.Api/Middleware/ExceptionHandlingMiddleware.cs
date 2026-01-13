@@ -1,3 +1,4 @@
+using System.Runtime.ExceptionServices;
 using MapServer.Domain.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
@@ -34,7 +35,7 @@ public class ExceptionHandlingMiddleware
     private async Task HandleExceptionAsync(HttpContext context, Exception ex)
     {
         if (context.Response.HasStarted)
-            throw ex;
+            ExceptionDispatchInfo.Throw(ex);  // Preserve stack trace
 
         var (statusCode, title, detail) = MapException(ex);
 

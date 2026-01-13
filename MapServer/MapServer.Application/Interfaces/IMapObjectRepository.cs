@@ -1,27 +1,27 @@
 using MapServer.Domain.Entities;
 
-namespace MapServer.Domain.Interfaces;
+namespace MapServer.Application.Interfaces;
 
 /// <summary>
-/// Contract for map object data access operations.
-/// Includes batch creation support for efficient bulk inserts.
+/// Port for map object persistence operations.
+/// Implementations are in Infrastructure layer.
 /// </summary>
 public interface IMapObjectRepository
 {
     /// <summary>
-    /// Retrieve all map objects from the database.
+    /// Retrieve all map objects.
     /// </summary>
     Task<List<MapObject>> GetAllAsync();
 
     /// <summary>
     /// Retrieve one map object by its ID.
     /// </summary>
-    /// <param name="id">The MongoDB ObjectId as a string.</param>
+    /// <param name="id">The unique identifier.</param>
     /// <returns>The map object if found, null otherwise.</returns>
     Task<MapObject?> GetByIdAsync(string id);
 
     /// <summary>
-    /// Save a single new map object to the database.
+    /// Save a single new map object.
     /// </summary>
     /// <param name="mapObject">The map object to save.</param>
     /// <returns>The map object with its assigned Id.</returns>
@@ -29,7 +29,6 @@ public interface IMapObjectRepository
 
     /// <summary>
     /// Save multiple map objects at once (batch operation).
-    /// More efficient than individual inserts - single database round trip.
     /// </summary>
     /// <param name="mapObjects">The list of map objects to save.</param>
     /// <returns>The map objects with their assigned Ids.</returns>
@@ -38,7 +37,7 @@ public interface IMapObjectRepository
     /// <summary>
     /// Delete one map object by its ID.
     /// </summary>
-    /// <param name="id">The MongoDB ObjectId as a string.</param>
+    /// <param name="id">The unique identifier.</param>
     /// <returns>True if deleted, false if not found.</returns>
     Task<bool> DeleteAsync(string id);
 }

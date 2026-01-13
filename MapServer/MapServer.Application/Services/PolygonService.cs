@@ -2,7 +2,6 @@ using MapServer.Application.DTOs;
 using MapServer.Application.Interfaces;
 using MapServer.Domain.Entities;
 using MapServer.Domain.Exceptions;
-using MapServer.Domain.Interfaces;
 using MongoDB.Driver.GeoJsonObjectModel;
 
 namespace MapServer.Application.Services;
