@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace MapServer.Application.DTOs;
 
 /// <summary>
@@ -8,5 +10,7 @@ public record BatchCreateMapObjectsRequest
     /// <summary>
     /// The objects to create.
     /// </summary>
+    [Required(ErrorMessage = "Objects are required")]
+    [MinLength(1, ErrorMessage = "At least one object is required")]
     public List<CreateMapObjectRequest> Objects { get; init; } = [];
 }

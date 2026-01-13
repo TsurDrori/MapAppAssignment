@@ -1,15 +1,14 @@
 using MapServer.Application.DTOs;
 using MapServer.Application.Interfaces;
 using MapServer.Domain.Entities;
-using MapServer.Domain.Exceptions;
 using MapServer.Domain.Interfaces;
 using MongoDB.Driver.GeoJsonObjectModel;
 
 namespace MapServer.Application.Services;
 
 /// <summary>
-/// Business logic for map object operations.
-/// Handles validation, coordinate transformation, and batch operations.
+/// Orchestrates map object operations.
+/// Input validation handled by DTOs via DataAnnotations.
 /// </summary>
 public class MapObjectService : IMapObjectService
 {
@@ -34,8 +33,6 @@ public class MapObjectService : IMapObjectService
 
     public async Task<MapObjectDto> CreateAsync(CreateMapObjectRequest request)
     {
-        ValidateCoordinate(request.Location);
-
         var mapObject = new MapObject
         {
             Location = CreateGeoJsonPoint(request.Location),
@@ -48,15 +45,10 @@ public class MapObjectService : IMapObjectService
 
     public async Task<List<MapObjectDto>> CreateManyAsync(BatchCreateMapObjectsRequest request)
     {
-        var mapObjects = request.Objects.Select(obj =>
+        var mapObjects = request.Objects.Select(obj => new MapObject
         {
-            ValidateCoordinate(obj.Location);
-
-            return new MapObject
-            {
-                Location = CreateGeoJsonPoint(obj.Location),
-                ObjectType = obj.ObjectType
-            };
+            Location = CreateGeoJsonPoint(obj.Location),
+            ObjectType = obj.ObjectType
         }).ToList();
 
         var created = await _repository.CreateManyAsync(mapObjects);
@@ -74,19 +66,6 @@ public class MapObjectService : IMapObjectService
     }
 
     #region Private Helpers
-
-    private static void ValidateCoordinate(Coordinate coord)
-    {
-        if (coord.Latitude < -90 || coord.Latitude > 90)
-        {
-            throw new ValidationException($"Latitude must be between -90 and 90, got {coord.Latitude}");
-        }
-
-        if (coord.Longitude < -180 || coord.Longitude > 180)
-        {
-            throw new ValidationException($"Longitude must be between -180 and 180, got {coord.Longitude}");
-        }
-    }
 
     private static GeoJsonPoint<GeoJson2DGeographicCoordinates> CreateGeoJsonPoint(Coordinate coord)
     {
