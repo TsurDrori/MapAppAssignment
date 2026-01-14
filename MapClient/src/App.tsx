@@ -1,9 +1,11 @@
+import { lazy, Suspense } from 'react';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { MapView } from '@/features/map/MapView';
 import { PolygonPanel } from '@/features/polygons/PolygonPanel';
 import { ObjectPanel } from '@/features/objects/ObjectPanel';
-import { DataTablePanel } from '@/features/data-table/DataTablePanel';
 import { useMapState } from '@/context/MapContext';
+
+const DataTablePanel = lazy(() => import('@/features/data-table/DataTablePanel'));
 
 function AppContent() {
   const { mode } = useMapState();
@@ -83,9 +85,25 @@ function AppContent() {
             </section>
 
             <aside className="min-h-0 flex flex-col gap-4">
-              <PolygonPanel />
-              <ObjectPanel />
-              <DataTablePanel />
+              <ErrorBoundary
+                fallback={
+                  <div className="rounded-2xl bg-rose-50 p-4 text-sm text-rose-700 ring-1 ring-inset ring-rose-200">
+                    Something went wrong in the panels. The map is still available.
+                  </div>
+                }
+              >
+                <PolygonPanel />
+                <ObjectPanel />
+                <Suspense
+                  fallback={
+                    <div className="rounded-2xl bg-white/70 p-4 text-sm text-slate-500 ring-1 ring-inset ring-slate-900/10">
+                      Loading data table...
+                    </div>
+                  }
+                >
+                  <DataTablePanel />
+                </Suspense>
+              </ErrorBoundary>
             </aside>
           </div>
         </div>

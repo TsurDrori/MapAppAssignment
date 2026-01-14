@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { Panel } from '@/components/ui/Panel';
 import { Button } from '@/components/ui/Button';
 import { ObjectTypeSelector } from './ObjectTypeSelector';
@@ -30,16 +31,16 @@ export function ObjectPanel() {
   const isPlacing = mode === 'place-object';
   const hasPendingObjects = pendingObjects.length > 0;
 
-  const handleAdd = () => {
+  const handleAdd = useCallback(() => {
     dispatch({ type: 'ENTER_PLACE_OBJECT_MODE', payload: objectTypeToPlace });
-  };
+  }, [dispatch, objectTypeToPlace]);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     dispatch({ type: 'EXIT_PLACE_OBJECT_MODE' });
     dispatch({ type: 'CLEAR_PENDING_OBJECTS' });
-  };
+  }, [dispatch]);
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     if (!hasPendingObjects) return;
 
     createObjectsBatch.mutate({
@@ -48,24 +49,24 @@ export function ObjectPanel() {
         objectType: obj.objectType,
       })),
     });
-  };
+  }, [hasPendingObjects, pendingObjects, createObjectsBatch]);
 
-  const handleDeleteSelected = () => {
+  const handleDeleteSelected = useCallback(() => {
     if (!selectedObjectId) return;
     deleteObject.mutate(selectedObjectId);
-  };
+  }, [selectedObjectId, deleteObject]);
 
   // Inline error for create mutation
   const inlineError = createObjectsBatch.isError
     ? getErrorMessage(createObjectsBatch.error, 'Failed to save')
     : null;
 
-  const handleTypeChange = (newType: string) => {
+  const handleTypeChange = useCallback((newType: string) => {
     dispatch({ type: 'SET_OBJECT_TYPE', payload: newType });
     if (isPlacing) {
       dispatch({ type: 'ENTER_PLACE_OBJECT_MODE', payload: newType });
     }
-  };
+  }, [dispatch, isPlacing]);
 
   return (
     <Panel

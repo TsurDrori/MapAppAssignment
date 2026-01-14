@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { Panel } from '@/components/ui/Panel';
 import { Table } from '@/components/ui/Table';
 import { usePolygons } from '@/features/polygons/hooks/usePolygons';
@@ -56,13 +56,13 @@ export function DataTablePanel() {
 
   const selectedKey = selectedPolygonId ?? selectedObjectId ?? null;
 
-  const handleRowClick = (item: TableItem) => {
+  const handleRowClick = useCallback((item: TableItem) => {
     if (item.type === 'polygon') {
       dispatch({ type: 'SELECT_POLYGON', payload: item.id });
     } else {
       dispatch({ type: 'SELECT_OBJECT', payload: item.id });
     }
-  };
+  }, [dispatch]);
 
   const columns = [
     {
@@ -146,3 +146,6 @@ function calculateCentroid(
     longitude: sum.longitude / coordinates.length,
   };
 }
+
+// Default export for lazy loading
+export default DataTablePanel;

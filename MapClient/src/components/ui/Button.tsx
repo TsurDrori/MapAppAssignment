@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import { memo, type ButtonHTMLAttributes, type ReactNode } from 'react';
 
 type ButtonVariant = 'primary' | 'secondary' | 'danger';
 
@@ -17,7 +17,7 @@ const variantStyles: Record<ButtonVariant, string> = {
     'bg-rose-600 text-white ring-rose-600/25 hover:bg-rose-700 active:bg-rose-800',
 };
 
-export function Button({
+export const Button = memo(function Button({
   variant = 'primary',
   children,
   isLoading = false,
@@ -71,4 +71,4 @@ export function Button({
       )}
     </button>
   );
-}
+});

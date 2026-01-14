@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Panel } from '@/components/ui/Panel';
 import { Button } from '@/components/ui/Button';
 import { useMapState, useMapDispatch } from '@/context/MapContext';
@@ -30,17 +30,19 @@ export function PolygonPanel() {
     createPolygon.reset(); // Clear mutation error state
   };
 
-  const handleAdd = () => {
-    clearErrors();
+  const handleAdd = useCallback(() => {
+    setValidationError(null);
+    createPolygon.reset();
     dispatch({ type: 'ENTER_DRAW_MODE' });
-  };
+  }, [dispatch, createPolygon]);
 
-  const handleCancel = () => {
-    clearErrors();
+  const handleCancel = useCallback(() => {
+    setValidationError(null);
+    createPolygon.reset();
     dispatch({ type: 'EXIT_DRAW_MODE' });
-  };
+  }, [dispatch, createPolygon]);
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     if (!canSave) return;
 
     // Client-side validation
@@ -52,16 +54,16 @@ export function PolygonPanel() {
 
     setValidationError(null);
     createPolygon.mutate({ coordinates: pendingPolygonPoints });
-  };
+  }, [canSave, pendingPolygonPoints, createPolygon]);
 
   // Combine validation error with mutation error for inline display
   const inlineError = validationError ||
     (createPolygon.isError ? getErrorMessage(createPolygon.error, 'Failed to save') : null);
 
-  const handleDeleteSelected = () => {
+  const handleDeleteSelected = useCallback(() => {
     if (!selectedPolygonId) return;
     deletePolygon.mutate(selectedPolygonId);
-  };
+  }, [selectedPolygonId, deletePolygon]);
 
   return (
     <Panel
