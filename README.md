@@ -29,7 +29,7 @@ A full-stack map application for managing geographic objects (polygons and marke
 ### 1. Clone the repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/TsurDrori/MapAppAssignment.git
 cd MapApp
 ```
 
