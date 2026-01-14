@@ -2,8 +2,8 @@
 @polygonId = REPLACE_WITH_ACTUAL_ID
 @objectId = REPLACE_WITH_ACTUAL_ID
 
-### Health Check - Get OpenAPI spec (dev only)
-GET {{MapServer_HostAddress}}/openapi/v1.json
+### Health Check - Get Swagger spec (dev only)
+GET {{MapServer_HostAddress}}/swagger/v1/swagger.json
 Accept: application/json
 
 ###############################################################################
@@ -84,9 +84,6 @@ Content-Type: application/json
 ### Delete polygon by ID
 DELETE {{MapServer_HostAddress}}/api/polygons/{{polygonId}}
 
-### Delete all polygons
-DELETE {{MapServer_HostAddress}}/api/polygons
-
 ###############################################################################
 # MAP OBJECTS
 ###############################################################################
@@ -158,6 +155,3 @@ Content-Type: application/json
 
 ### Delete map object by ID
 DELETE {{MapServer_HostAddress}}/api/objects/{{objectId}}
-
-### Delete all map objects
-DELETE {{MapServer_HostAddress}}/api/objects

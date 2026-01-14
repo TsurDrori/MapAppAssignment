@@ -51,7 +51,7 @@ dotnet run --project MapServer.Api --launch-profile https  # HTTPS
 The server will be available at:
 - **HTTP**: `http://localhost:5102`
 - **HTTPS**: `https://localhost:7103`
-- **OpenAPI** (dev only): `/openapi/v1.json`
+- **Swagger UI** (dev only): `http://localhost:5102/swagger`
 
 ## Testing the API
 
@@ -101,7 +101,6 @@ curl -X POST http://localhost:5102/api/objects \
 | GET | `/api/polygons/{id}` | Get polygon by ID |
 | POST | `/api/polygons` | Create polygon |
 | DELETE | `/api/polygons/{id}` | Delete polygon |
-| DELETE | `/api/polygons` | Delete all polygons |
 
 ### Map Objects
 | Method | Endpoint | Description |
@@ -111,7 +110,6 @@ curl -X POST http://localhost:5102/api/objects \
 | POST | `/api/objects` | Create single object |
 | POST | `/api/objects/batch` | Create multiple objects |
 | DELETE | `/api/objects/{id}` | Delete object |
-| DELETE | `/api/objects` | Delete all objects |
 
 ## Project Structure
 
