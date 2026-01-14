@@ -33,7 +33,7 @@ builder.Services.AddCors(options =>
 // Dependency Injection Registration
 
 // Infrastructure - Singleton (database connection)
-builder.Services.AddSingleton<MongoDbContext>();//CHECK THIS
+builder.Services.AddSingleton<MongoDbContext>();
 
 // Infrastructure - Scoped (repositories)
 builder.Services.AddScoped<IPolygonRepository, PolygonRepository>();

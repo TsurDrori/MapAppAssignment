@@ -25,7 +25,7 @@ public class PolygonsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<PolygonDto>>> GetAll()
     {
-        var polygons = await _polygonService.GetAllAsync();//CHECK
+        var polygons = await _polygonService.GetAllAsync();
         return Ok(polygons);
     }
 
