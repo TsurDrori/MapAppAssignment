@@ -2,7 +2,7 @@ using MapServer.Application.DTOs;
 using MapServer.Application.Interfaces;
 using MapServer.Domain.Entities;
 using MapServer.Domain.Exceptions;
-using MongoDB.Driver.GeoJsonObjectModel;
+using MapServer.Domain.ValueObjects;
 
 namespace MapServer.Application.Services;
 
@@ -35,9 +35,17 @@ public class PolygonService : IPolygonService
 
     public async Task<PolygonDto> CreateAsync(CreatePolygonRequest request)
     {
+        // Guard validation - consistent behavior regardless of entry point
+        if (request.Coordinates == null || request.Coordinates.Count < 3)
+            throw new ValidationException("Polygon must have at least 3 coordinates");
+
+        var coordinates = EnsureClosed(request.Coordinates);
+
         var polygon = new Polygon
         {
-            Geometry = CreateGeoJsonPolygon(request.Coordinates)
+            Coordinates = coordinates
+                .Select(c => new GeoCoordinate(c.Latitude, c.Longitude))
+                .ToList()
         };
 
         var created = await _repository.CreateAsync(polygon);
@@ -53,21 +61,6 @@ public class PolygonService : IPolygonService
 
     #region Private Helpers
 
-    private static GeoJsonPolygon<GeoJson2DGeographicCoordinates> CreateGeoJsonPolygon(List<Coordinate> coordinates)
-    {
-        var closed = EnsureClosed(coordinates);
-
-        var geoJsonCoordinates = closed
-            .Select(c => new GeoJson2DGeographicCoordinates(c.Longitude, c.Latitude))
-            .ToList();
-
-        var linearRing = new GeoJsonLinearRingCoordinates<GeoJson2DGeographicCoordinates>(geoJsonCoordinates);
-
-        return new GeoJsonPolygon<GeoJson2DGeographicCoordinates>(
-            new GeoJsonPolygonCoordinates<GeoJson2DGeographicCoordinates>(linearRing)
-        );
-    }
-
     private static List<Coordinate> EnsureClosed(List<Coordinate> coordinates)
     {
         var first = coordinates[0];
@@ -81,11 +74,11 @@ public class PolygonService : IPolygonService
 
     private static PolygonDto MapToDto(Polygon polygon)
     {
-        var coordinates = polygon.Geometry.Coordinates.Exterior.Positions
-            .Select(pos => new Coordinate
+        var coordinates = polygon.Coordinates
+            .Select(c => new Coordinate
             {
-                Latitude = pos.Latitude,
-                Longitude = pos.Longitude
+                Latitude = c.Latitude,
+                Longitude = c.Longitude
             })
             .ToList();
 

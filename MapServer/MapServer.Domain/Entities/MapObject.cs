@@ -1,21 +1,18 @@
-using MongoDB.Driver.GeoJsonObjectModel;
+using MapServer.Domain.ValueObjects;
 
 namespace MapServer.Domain.Entities;
 
 /// <summary>
 /// Domain entity representing a map object (marker, vehicle, etc.).
-/// Uses GeoJSON (RFC 7946) for geographic representation.
-/// GeoJSON is an open standard - this is domain knowledge, not persistence concern.
 /// </summary>
 public class MapObject
 {
     public string? Id { get; set; }
 
     /// <summary>
-    /// The location as a GeoJSON Point.
-    /// GeoJSON is an open standard, not a MongoDB-specific concern.
+    /// The location of this object on the map.
     /// </summary>
-    public GeoJsonPoint<GeoJson2DGeographicCoordinates> Location { get; set; } = null!;
+    public GeoCoordinate Location { get; set; } = null!;
 
     /// <summary>
     /// The type of object (e.g., "Marker", "Jeep", "Tank").

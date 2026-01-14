@@ -6,8 +6,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
-  <!-- No direct MongoDB dependency - GeoJSON types flow through Domain reference -->
-
   <ItemGroup>
     <ProjectReference Include="..\MapServer.Domain\MapServer.Domain.csproj" />
   </ItemGroup>

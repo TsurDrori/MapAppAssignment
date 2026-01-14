@@ -2,7 +2,7 @@ using MapServer.Application.DTOs;
 using MapServer.Application.Interfaces;
 using MapServer.Domain.Entities;
 using MapServer.Domain.Exceptions;
-using MongoDB.Driver.GeoJsonObjectModel;
+using MapServer.Domain.ValueObjects;
 
 namespace MapServer.Application.Services;
 
@@ -21,7 +21,6 @@ public class MapObjectService : IMapObjectService
 
     public async Task<List<MapObjectDto>> GetAllAsync()
     {
-
         var objects = await _repository.GetAllAsync();
         return objects.Select(MapToDto).ToList();
     }
@@ -36,9 +35,12 @@ public class MapObjectService : IMapObjectService
 
     public async Task<MapObjectDto> CreateAsync(CreateMapObjectRequest request)
     {
+        // Guard validation - consistent behavior regardless of entry point
+        ValidateRequest(request);
+
         var mapObject = new MapObject
         {
-            Location = CreateGeoJsonPoint(request.Location),
+            Location = new GeoCoordinate(request.Location.Latitude, request.Location.Longitude),
             ObjectType = request.ObjectType
         };
 
@@ -48,9 +50,18 @@ public class MapObjectService : IMapObjectService
 
     public async Task<List<MapObjectDto>> CreateManyAsync(BatchCreateMapObjectsRequest request)
     {
+        // Guard validation
+        if (request.Objects == null || request.Objects.Count == 0)
+            throw new ValidationException("At least one object is required");
+
+        foreach (var obj in request.Objects)
+        {
+            ValidateRequest(obj);
+        }
+
         var mapObjects = request.Objects.Select(obj => new MapObject
         {
-            Location = CreateGeoJsonPoint(obj.Location),
+            Location = new GeoCoordinate(obj.Location.Latitude, obj.Location.Longitude),
             ObjectType = obj.ObjectType
         }).ToList();
 
@@ -67,11 +78,13 @@ public class MapObjectService : IMapObjectService
 
     #region Private Helpers
 
-    private static GeoJsonPoint<GeoJson2DGeographicCoordinates> CreateGeoJsonPoint(Coordinate coord)
+    private static void ValidateRequest(CreateMapObjectRequest request)
     {
-        return new GeoJsonPoint<GeoJson2DGeographicCoordinates>(
-            new GeoJson2DGeographicCoordinates(coord.Longitude, coord.Latitude)
-        );
+        if (request.Location == null)
+            throw new ValidationException("Location is required");
+
+        if (string.IsNullOrWhiteSpace(request.ObjectType))
+            throw new ValidationException("ObjectType is required");
     }
 
     private static MapObjectDto MapToDto(MapObject obj)
@@ -81,8 +94,8 @@ public class MapObjectService : IMapObjectService
             Id = obj.Id,
             Location = new Coordinate
             {
-                Latitude = obj.Location.Coordinates.Latitude,
-                Longitude = obj.Location.Coordinates.Longitude
+                Latitude = obj.Location.Latitude,
+                Longitude = obj.Location.Longitude
             },
             ObjectType = obj.ObjectType
         };
