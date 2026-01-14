@@ -401,6 +401,10 @@ public async Task<IActionResult> CreateBatch([FromBody] List<CreateObjectDto> dt
 - Polygons: "Deletes a selected polygon **or all polygons**"
 - Objects: "Removes the **selected object**" (no "all" mentioned)
 
+**Current Implementation (this repository):**
+- Implemented: `DELETE /api/polygons/{id}`, `DELETE /api/objects/{id}`
+- Not implemented: `DELETE /api/polygons`, `DELETE /api/objects`
+
 ### Options Explored
 
 #### Option A: Literal Interpretation (Asymmetric)
@@ -433,7 +437,7 @@ await fetch('/api/objects', { method: 'DELETE' });
 
 ---
 
-#### Option B: Symmetric API (Our Choice)
+#### Option B: Symmetric API (Follow-up Option)
 ```
 DELETE /api/polygons/{id}    ✅
 DELETE /api/polygons         ✅
@@ -452,8 +456,8 @@ DELETE /api/objects          ✅ Added for consistency
 - ⚠️ Goes beyond literal assignment (but improves design)
 - ⚠️ Slightly more code (~10 lines)
 
-**Why We Chose It:**
-In an interview context, demonstrating good judgment to improve on requirements is valuable. The asymmetry would likely come up in code review as an inconsistency.
+**Why It's a Good Follow-up:**
+It provides an easy "clear all" UX and keeps the API symmetric, but it is not currently implemented in this codebase.
 
 ---
 
@@ -496,7 +500,7 @@ public async Task<IActionResult> Update(string id, UpdatePolygonDto dto) {
 // Service validation
 public async Task<Polygon> UpdateAsync(string id, UpdatePolygonDto dto) {
     var existing = await _repository.GetByIdAsync(id);
-    if (existing == null) throw new NotFoundException();
+    if (existing == null) throw new EntityNotFoundException("Polygon", id);
 
     // Validate new coordinates
     if (dto.Coordinates.Count < 3) throw new ValidationException();
@@ -1394,67 +1398,43 @@ catch (ValidationException ex) {
 
 #### Option C: RFC 7807 Problem Details (Our Choice)
 ```csharp
-// ASP.NET Core has built-in support
-public class Program {
-    public static void Main(string[] args) {
-        var builder = WebApplication.CreateBuilder(args);
+// Program.cs (this project)
+var builder = WebApplication.CreateBuilder(args);
 
-        // Enable Problem Details
-        builder.Services.AddProblemDetails();
+builder.Services.AddControllers();
+builder.Services.AddSwaggerGen();
 
-        var app = builder.Build();
+var app = builder.Build();
 
-        // Global exception handler
-        app.UseExceptionHandler();
+// Global exception mapping -> RFC 7807 ProblemDetails
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-        app.Run();
-    }
-}
+app.UseHttpsRedirection();
+app.UseCors("AllowReactApp");
+app.MapControllers();
 
-// Custom exception handler
-app.UseExceptionHandler(errorApp => {
-    errorApp.Run(async context => {
-        var exception = context.Features.Get<IExceptionHandlerFeature>()?.Error;
+app.Run();
+```
 
-        var problemDetails = exception switch {
-            ValidationException vex => new ProblemDetails {
-                Type = "https://api.example.com/errors/validation",
-                Title = "Validation Failed",
-                Status = StatusCodes.Status400BadRequest,
-                Detail = vex.Message,
-                Instance = context.Request.Path
-            },
-            NotFoundException nex => new ProblemDetails {
-                Type = "https://api.example.com/errors/not-found",
-                Title = "Resource Not Found",
-                Status = StatusCodes.Status404NotFound,
-                Detail = nex.Message,
-                Instance = context.Request.Path
-            },
-            _ => new ProblemDetails {
-                Type = "https://api.example.com/errors/server-error",
-                Title = "An error occurred",
-                Status = StatusCodes.Status500InternalServerError,
-                Detail = "An unexpected error occurred",
-                Instance = context.Request.Path
-            }
-        };
-
-        // Add trace ID for debugging
-        problemDetails.Extensions["traceId"] = context.TraceIdentifier;
-
-        context.Response.StatusCode = problemDetails.Status ?? 500;
-        await context.Response.WriteAsJsonAsync(problemDetails);
-    });
-});
-
-// Response
+```csharp
+// ExceptionHandlingMiddleware (simplified mapping)
+return ex switch
 {
-  "type": "https://api.example.com/errors/validation",
-  "title": "Validation Failed",
+    EntityNotFoundException e => (StatusCodes.Status404NotFound, "Not found", e.Message),
+    ValidationException e => (StatusCodes.Status400BadRequest, "Validation error", e.Message),
+    MongoWriteException => (StatusCodes.Status400BadRequest, "Invalid geometry",
+        "Polygon edges must not cross each other (self-intersection)."),
+    _ => (StatusCodes.Status500InternalServerError, "Server error", "An unexpected error occurred.")
+};
+```
+
+**Note:** ASP.NET Core's `[ApiController]` model validation (DataAnnotations) returns RFC 7807 `ValidationProblemDetails` automatically for invalid request bodies.
+
+// Response (example from middleware)
+{
+  "title": "Validation error",
   "status": 400,
   "detail": "Polygon must have at least 3 coordinates",
-  "instance": "/api/polygons",
   "traceId": "0HMVFE42N0O8C:00000001"
 }
 ```
@@ -1474,11 +1454,10 @@ app.UseExceptionHandler(errorApp => {
 ```typescript
 // TypeScript client with type safety
 interface ProblemDetails {
-  type: string;
   title: string;
   status: number;
-  detail: string;
-  instance: string;
+  detail?: string;
+  errors?: Record<string, string[]>;
   traceId?: string;
 }
 
@@ -1488,16 +1467,11 @@ try {
   const problem: ProblemDetails = error.response.data;
 
   // Type-safe handling
-  switch (problem.type) {
-    case 'https://api.example.com/errors/validation':
-      showValidationError(problem.detail);
-      break;
-    case 'https://api.example.com/errors/not-found':
-      showNotFoundError();
-      break;
-    default:
-      logError(problem.traceId); // Send to support
-      showGenericError();
+  if (problem.status === 400) showValidationError(problem.detail ?? '');
+  else if (problem.status === 404) showNotFoundError();
+  else {
+    logError(problem.traceId); // Send to support
+    showGenericError();
   }
 }
 ```
@@ -1526,15 +1500,16 @@ public class ValidationException : DomainException {
 }
 
 // Not found errors (404)
-public class NotFoundException : DomainException {
-    public NotFoundException(string message) : base(message) { }
+public class EntityNotFoundException : DomainException {
+    public EntityNotFoundException(string entityType, string entityId)
+        : base($"{entityType} with ID '{entityId}' was not found") { }
 }
 
 // Usage in service
 public async Task<PolygonDto> GetByIdAsync(string id) {
     var polygon = await _repository.GetByIdAsync(id);
     if (polygon == null) {
-        throw new NotFoundException($"Polygon with ID '{id}' not found");
+        throw new EntityNotFoundException("Polygon", id);
     }
     return MapToDto(polygon);
 }
@@ -1831,7 +1806,7 @@ For read-heavy map apps, indexes are worth it.
 |----------|--------|-----------|
 | **Architecture Pattern** | Clean Architecture | Separation of concerns, testability, professionalism |
 | **Batch Endpoint** | Separate `/batch` | Matches assignment, explicit contracts |
-| **Delete All** | Add to both resources | API consistency, better UX |
+| **Delete All** | Not implemented (delete by ID only) | Kept scope minimal; can be added later |
 | **Update Operations** | Omit (not in assignment) | Follow requirements, avoid gold-plating |
 | **Data Model** | DTO + Domain + Document | Clean boundaries, database independence |
 | **Coordinate Order** | [Lat, Lon] in API | Natural, matches client library |

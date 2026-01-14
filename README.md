@@ -73,22 +73,20 @@ The application will be available at `http://localhost:5173`.
 
 ```
 MapApp/
-├── MapClient/                    # React frontend
-│   ├── src/
-│   │   ├── api/                  # API client and endpoints
-│   │   ├── components/           # Reusable UI components
-│   │   ├── context/              # React context (MapContext)
-│   │   ├── features/             # Feature modules (map, polygons, objects)
-│   │   └── types/                # TypeScript types
-│   └── ...
-├── MapServer/                    # ASP.NET Core backend (Clean Architecture)
-│   ├── MapServer.slnx            # Solution file
-│   ├── MapServer.Api/            # Presentation layer (Controllers, Program.cs)
-│   ├── MapServer.Application/    # Application layer (Services, DTOs)
-│   ├── MapServer.Domain/         # Domain layer (Entities, Repository interfaces)
-│   ├── MapServer.Infrastructure/ # Infrastructure layer (Repositories, DbContext)
-│   └── ...
-└── README.md
+  MapClient/                    # React frontend
+    src/
+      api/                      # API client and endpoints
+      components/               # Reusable UI components
+      context/                  # React context (MapContext)
+      features/                 # Feature modules (map, polygons, objects)
+      types/                    # TypeScript types
+  MapServer/                    # ASP.NET Core backend (Clean Architecture)
+    MapServer.slnx              # Solution file
+    MapServer.Api/              # Presentation layer (Controllers, Program.cs)
+    MapServer.Application/      # Application layer (Services, DTOs)
+    MapServer.Domain/           # Domain layer (Entities, repository interfaces)
+    MapServer.Infrastructure/   # Infrastructure layer (Repositories, MongoDbContext)
+  README.md
 ```
 
 ## Features
