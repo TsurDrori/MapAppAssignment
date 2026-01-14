@@ -11,23 +11,23 @@ public interface IPolygonService
     /// <summary>
     /// Get all polygons.
     /// </summary>
-    Task<List<PolygonDto>> GetAllAsync();
+    Task<List<PolygonDto>> GetAllAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get one polygon by its ID.
     /// </summary>
     /// <exception cref="EntityNotFoundException">Thrown if polygon not found.</exception>
-    Task<PolygonDto> GetByIdAsync(string id);
+    Task<PolygonDto> GetByIdAsync(string id, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Create a new polygon.
     /// </summary>
     /// <exception cref="InvalidGeometryException">Thrown if geometry is invalid.</exception>
-    Task<PolygonDto> CreateAsync(CreatePolygonRequest request);
+    Task<PolygonDto> CreateAsync(CreatePolygonRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Delete a polygon by ID.
     /// </summary>
     /// <exception cref="EntityNotFoundException">Thrown if polygon not found.</exception>
-    Task DeleteAsync(string id);
+    Task DeleteAsync(string id, CancellationToken cancellationToken = default);
 }

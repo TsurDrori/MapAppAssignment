@@ -23,9 +23,9 @@ public class ObjectsController : ControllerBase
     /// Get all map objects.
     /// </summary>
     [HttpGet]
-    public async Task<ActionResult<List<MapObjectDto>>> GetAll()
+    public async Task<ActionResult<List<MapObjectDto>>> GetAll(CancellationToken cancellationToken)
     {
-        var objects = await _mapObjectService.GetAllAsync();
+        var objects = await _mapObjectService.GetAllAsync(cancellationToken);
         return Ok(objects);
     }
 
@@ -33,9 +33,9 @@ public class ObjectsController : ControllerBase
     /// Get one map object by ID.
     /// </summary>
     [HttpGet("{id}")]
-    public async Task<ActionResult<MapObjectDto>> GetById(string id)
+    public async Task<ActionResult<MapObjectDto>> GetById(string id, CancellationToken cancellationToken)
     {
-        var obj = await _mapObjectService.GetByIdAsync(id);
+        var obj = await _mapObjectService.GetByIdAsync(id, cancellationToken);
         return Ok(obj);
     }
 
@@ -43,9 +43,9 @@ public class ObjectsController : ControllerBase
     /// Create a single map object.
     /// </summary>
     [HttpPost]
-    public async Task<ActionResult<MapObjectDto>> Create(CreateMapObjectRequest request)
+    public async Task<ActionResult<MapObjectDto>> Create(CreateMapObjectRequest request, CancellationToken cancellationToken)
     {
-        var created = await _mapObjectService.CreateAsync(request);
+        var created = await _mapObjectService.CreateAsync(request, cancellationToken);
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
@@ -53,9 +53,9 @@ public class ObjectsController : ControllerBase
     /// Create multiple map objects in one batch operation.
     /// </summary>
     [HttpPost("batch")]
-    public async Task<ActionResult<List<MapObjectDto>>> CreateBatch(BatchCreateMapObjectsRequest request)
+    public async Task<ActionResult<List<MapObjectDto>>> CreateBatch(BatchCreateMapObjectsRequest request, CancellationToken cancellationToken)
     {
-        var created = await _mapObjectService.CreateManyAsync(request);
+        var created = await _mapObjectService.CreateManyAsync(request, cancellationToken);
         return Ok(created);
     }
 
@@ -63,9 +63,9 @@ public class ObjectsController : ControllerBase
     /// Delete one map object by ID.
     /// </summary>
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(string id)
+    public async Task<IActionResult> Delete(string id, CancellationToken cancellationToken)
     {
-        await _mapObjectService.DeleteAsync(id);
+        await _mapObjectService.DeleteAsync(id, cancellationToken);
         return NoContent();
     }
 }

@@ -11,11 +11,11 @@ public record CreateMapObjectRequest
     /// Where to place this object on the map.
     /// </summary>
     [Required(ErrorMessage = "Location is required")]
-    public Coordinate Location { get; init; } = new();
+    public Coordinate? Location { get; init; }
 
     /// <summary>
     /// What kind of object this is (e.g., "Marker", "Jeep", "Tank").
     /// </summary>
     [Required(ErrorMessage = "ObjectType is required")]
-    public string ObjectType { get; init; } = string.Empty;
+    public string? ObjectType { get; init; }
 }

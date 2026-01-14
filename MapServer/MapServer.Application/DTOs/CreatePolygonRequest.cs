@@ -13,5 +13,5 @@ public record CreatePolygonRequest
     /// </summary>
     [Required(ErrorMessage = "Coordinates are required")]
     [MinLength(3, ErrorMessage = "Polygon must have at least 3 coordinates")]
-    public List<Coordinate> Coordinates { get; init; } = [];
+    public List<Coordinate>? Coordinates { get; init; }
 }

@@ -23,9 +23,9 @@ public class PolygonsController : ControllerBase
     /// Get all polygons.
     /// </summary>
     [HttpGet]
-    public async Task<ActionResult<List<PolygonDto>>> GetAll()
+    public async Task<ActionResult<List<PolygonDto>>> GetAll(CancellationToken cancellationToken)
     {
-        var polygons = await _polygonService.GetAllAsync();
+        var polygons = await _polygonService.GetAllAsync(cancellationToken);
         return Ok(polygons);
     }
 
@@ -33,9 +33,9 @@ public class PolygonsController : ControllerBase
     /// Get one polygon by ID.
     /// </summary>
     [HttpGet("{id}")]
-    public async Task<ActionResult<PolygonDto>> GetById(string id)
+    public async Task<ActionResult<PolygonDto>> GetById(string id, CancellationToken cancellationToken)
     {
-        var polygon = await _polygonService.GetByIdAsync(id);
+        var polygon = await _polygonService.GetByIdAsync(id, cancellationToken);
         return Ok(polygon);
     }
 
@@ -43,9 +43,9 @@ public class PolygonsController : ControllerBase
     /// Create a new polygon.
     /// </summary>
     [HttpPost]
-    public async Task<ActionResult<PolygonDto>> Create(CreatePolygonRequest request)
+    public async Task<ActionResult<PolygonDto>> Create(CreatePolygonRequest request, CancellationToken cancellationToken)
     {
-        var created = await _polygonService.CreateAsync(request);
+        var created = await _polygonService.CreateAsync(request, cancellationToken);
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
@@ -53,9 +53,9 @@ public class PolygonsController : ControllerBase
     /// Delete one polygon by ID.
     /// </summary>
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(string id)
+    public async Task<IActionResult> Delete(string id, CancellationToken cancellationToken)
     {
-        await _polygonService.DeleteAsync(id);
+        await _polygonService.DeleteAsync(id, cancellationToken);
         return NoContent();
     }
 }

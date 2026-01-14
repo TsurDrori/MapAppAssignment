@@ -13,11 +13,16 @@ public class ExceptionHandlingMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly IHostEnvironment _environment;
+    private readonly ILogger<ExceptionHandlingMiddleware> _logger;
 
-    public ExceptionHandlingMiddleware(RequestDelegate next, IHostEnvironment environment)
+    public ExceptionHandlingMiddleware(
+        RequestDelegate next,
+        IHostEnvironment environment,
+        ILogger<ExceptionHandlingMiddleware> logger)
     {
         _next = next;
         _environment = environment;
+        _logger = logger;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -39,6 +44,9 @@ public class ExceptionHandlingMiddleware
 
         var (statusCode, title, detail) = MapException(ex);
 
+        // Log exceptions before returning response
+        LogException(ex, statusCode, context);
+
         context.Response.Clear();
         context.Response.ContentType = "application/problem+json";
         context.Response.StatusCode = statusCode;
@@ -52,6 +60,24 @@ public class ExceptionHandlingMiddleware
         problem.Extensions["traceId"] = context.TraceIdentifier;
 
         await context.Response.WriteAsJsonAsync(problem);
+    }
+
+    private void LogException(Exception ex, int statusCode, HttpContext context)
+    {
+        var request = $"{context.Request.Method} {context.Request.Path}";
+
+        if (statusCode >= 500)
+        {
+            _logger.LogError(ex, "Unhandled exception for {Request}", request);
+        }
+        else if (statusCode == 404)
+        {
+            _logger.LogDebug(ex, "Not found for {Request}", request);
+        }
+        else
+        {
+            _logger.LogWarning(ex, "Client error for {Request}", request);
+        }
     }
 
     private (int statusCode, string title, string detail) MapException(Exception ex)

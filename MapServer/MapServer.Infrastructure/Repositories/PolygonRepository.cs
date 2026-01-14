@@ -20,29 +20,29 @@ public class PolygonRepository : IPolygonRepository
         _polygons = context.Polygons;
     }
 
-    public async Task<List<Polygon>> GetAllAsync()
+    public async Task<List<Polygon>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        var documents = await _polygons.Find(_ => true).ToListAsync();
+        var documents = await _polygons.Find(_ => true).ToListAsync(cancellationToken);
         return documents.Select(DocumentMapper.ToDomain).ToList();
     }
 
-    public async Task<Polygon?> GetByIdAsync(string id)
+    public async Task<Polygon?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
     {
-        var document = await _polygons.Find(p => p.Id == id).FirstOrDefaultAsync();
+        var document = await _polygons.Find(p => p.Id == id).FirstOrDefaultAsync(cancellationToken);
         return document == null ? null : DocumentMapper.ToDomain(document);
     }
 
-    public async Task<Polygon> CreateAsync(Polygon polygon)
+    public async Task<Polygon> CreateAsync(Polygon polygon, CancellationToken cancellationToken = default)
     {
         var document = DocumentMapper.ToDocument(polygon);
-        await _polygons.InsertOneAsync(document);
+        await _polygons.InsertOneAsync(document, options: null, cancellationToken);
         polygon.Id = document.Id;
         return polygon;
     }
 
-    public async Task<bool> DeleteAsync(string id)
+    public async Task<bool> DeleteAsync(string id, CancellationToken cancellationToken = default)
     {
-        var result = await _polygons.DeleteOneAsync(p => p.Id == id);
+        var result = await _polygons.DeleteOneAsync(p => p.Id == id, cancellationToken);
         return result.DeletedCount > 0;
     }
 }

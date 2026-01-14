@@ -12,5 +12,5 @@ public record BatchCreateMapObjectsRequest
     /// </summary>
     [Required(ErrorMessage = "Objects are required")]
     [MinLength(1, ErrorMessage = "At least one object is required")]
-    public List<CreateMapObjectRequest> Objects { get; init; } = [];
+    public List<CreateMapObjectRequest>? Objects { get; init; }
 }

@@ -19,36 +19,36 @@ public class MapObjectService : IMapObjectService
         _repository = repository;
     }
 
-    public async Task<List<MapObjectDto>> GetAllAsync()
+    public async Task<List<MapObjectDto>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        var objects = await _repository.GetAllAsync();
+        var objects = await _repository.GetAllAsync(cancellationToken);
         return objects.Select(MapToDto).ToList();
     }
 
-    public async Task<MapObjectDto> GetByIdAsync(string id)
+    public async Task<MapObjectDto> GetByIdAsync(string id, CancellationToken cancellationToken = default)
     {
-        var obj = await _repository.GetByIdAsync(id);
+        var obj = await _repository.GetByIdAsync(id, cancellationToken);
         if (obj == null)
             throw new EntityNotFoundException("MapObject", id);
         return MapToDto(obj);
     }
 
-    public async Task<MapObjectDto> CreateAsync(CreateMapObjectRequest request)
+    public async Task<MapObjectDto> CreateAsync(CreateMapObjectRequest request, CancellationToken cancellationToken = default)
     {
         // Guard validation - consistent behavior regardless of entry point
         ValidateRequest(request);
 
         var mapObject = new MapObject
         {
-            Location = new GeoCoordinate(request.Location.Latitude, request.Location.Longitude),
-            ObjectType = request.ObjectType
+            Location = new GeoCoordinate(request.Location!.Latitude, request.Location.Longitude),
+            ObjectType = request.ObjectType!
         };
 
-        var created = await _repository.CreateAsync(mapObject);
+        var created = await _repository.CreateAsync(mapObject, cancellationToken);
         return MapToDto(created);
     }
 
-    public async Task<List<MapObjectDto>> CreateManyAsync(BatchCreateMapObjectsRequest request)
+    public async Task<List<MapObjectDto>> CreateManyAsync(BatchCreateMapObjectsRequest request, CancellationToken cancellationToken = default)
     {
         // Guard validation
         if (request.Objects == null || request.Objects.Count == 0)
@@ -61,17 +61,17 @@ public class MapObjectService : IMapObjectService
 
         var mapObjects = request.Objects.Select(obj => new MapObject
         {
-            Location = new GeoCoordinate(obj.Location.Latitude, obj.Location.Longitude),
-            ObjectType = obj.ObjectType
+            Location = new GeoCoordinate(obj.Location!.Latitude, obj.Location.Longitude),
+            ObjectType = obj.ObjectType!
         }).ToList();
 
-        var created = await _repository.CreateManyAsync(mapObjects);
+        var created = await _repository.CreateManyAsync(mapObjects, cancellationToken);
         return created.Select(MapToDto).ToList();
     }
 
-    public async Task DeleteAsync(string id)
+    public async Task DeleteAsync(string id, CancellationToken cancellationToken = default)
     {
-        var deleted = await _repository.DeleteAsync(id);
+        var deleted = await _repository.DeleteAsync(id, cancellationToken);
         if (!deleted)
             throw new EntityNotFoundException("MapObject", id);
     }

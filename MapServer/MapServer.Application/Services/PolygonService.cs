@@ -19,21 +19,21 @@ public class PolygonService : IPolygonService
         _repository = repository;
     }
 
-    public async Task<List<PolygonDto>> GetAllAsync()
+    public async Task<List<PolygonDto>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        var polygons = await _repository.GetAllAsync();
+        var polygons = await _repository.GetAllAsync(cancellationToken);
         return polygons.Select(MapToDto).ToList();
     }
 
-    public async Task<PolygonDto> GetByIdAsync(string id)
+    public async Task<PolygonDto> GetByIdAsync(string id, CancellationToken cancellationToken = default)
     {
-        var polygon = await _repository.GetByIdAsync(id);
+        var polygon = await _repository.GetByIdAsync(id, cancellationToken);
         if (polygon == null)
             throw new EntityNotFoundException("Polygon", id);
         return MapToDto(polygon);
     }
 
-    public async Task<PolygonDto> CreateAsync(CreatePolygonRequest request)
+    public async Task<PolygonDto> CreateAsync(CreatePolygonRequest request, CancellationToken cancellationToken = default)
     {
         // Guard validation - consistent behavior regardless of entry point
         if (request.Coordinates == null || request.Coordinates.Count < 3)
@@ -48,13 +48,13 @@ public class PolygonService : IPolygonService
                 .ToList()
         };
 
-        var created = await _repository.CreateAsync(polygon);
+        var created = await _repository.CreateAsync(polygon, cancellationToken);
         return MapToDto(created);
     }
 
-    public async Task DeleteAsync(string id)
+    public async Task DeleteAsync(string id, CancellationToken cancellationToken = default)
     {
-        var deleted = await _repository.DeleteAsync(id);
+        var deleted = await _repository.DeleteAsync(id, cancellationToken);
         if (!deleted)
             throw new EntityNotFoundException("Polygon", id);
     }
