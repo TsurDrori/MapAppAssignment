@@ -135,12 +135,12 @@ This provides a full interactive interface to explore and test all API endpoints
 
 ### Backend (MapServer)
 
-| Command          | Description              |
-| ---------------- | ------------------------ |
-| `./run`          | Run the server           |
-| `./build`        | Build all projects       |
-| `./watch`        | Run with hot reload      |
-| `dotnet restore` | Restore dependencies     |
+| Command          | Description          |
+| ---------------- | -------------------- |
+| `./run`          | Run the server       |
+| `./build`        | Build all projects   |
+| `./watch`        | Run with hot reload  |
+| `dotnet restore` | Restore dependencies |
 
 ## Configuration
 
@@ -163,18 +163,19 @@ The Vite dev server proxies `/api` requests to `http://localhost:5102`. This can
 
 ## Architecture & Design Decisions
 
-### Backend Architecture
+### Backend (MapServer)
 
 The server follows **Clean Architecture** with a multi-project solution structure:
 
-| Project        | Layer          | Responsibility                                  |
-| -------------- | -------------- | ----------------------------------------------- |
-| MapServer.Api  | Presentation   | HTTP routing, DI configuration (thin controllers) |
-| MapServer.Application | Application | Business logic, validation, DTOs |
-| MapServer.Domain | Domain       | Entities, repository interfaces (core abstractions) |
-| MapServer.Infrastructure | Infrastructure | Data access, MongoDB operations |
+| Project                  | Layer          | Responsibility                                      |
+| ------------------------ | -------------- | --------------------------------------------------- |
+| MapServer.Api            | Presentation   | HTTP routing, DI configuration (thin controllers)   |
+| MapServer.Application    | Application    | Business logic, validation, DTOs                    |
+| MapServer.Domain         | Domain         | Entities, repository interfaces (core abstractions) |
+| MapServer.Infrastructure | Infrastructure | Data access, MongoDB operations                     |
 
 **Project Dependencies (Dependency Inversion Principle):**
+
 - Api → Application, Infrastructure
 - Application → Domain
 - Infrastructure → Domain
@@ -188,27 +189,21 @@ The server follows **Clean Architecture** with a multi-project solution structur
 - **Service-level validation** - keeps validation visible and simple for this project scope
 - **DTO pattern** - separates API contracts from database models, making the API database-agnostic
 - **Separate batch endpoint** (`/objects/batch`) - explicit contracts rather than polymorphic endpoints
+- **Coordinate handling** - API uses explicit `{ latitude, longitude }` objects (not arrays) to prevent GeoJSON/Leaflet coordinate order confusion; conversion happens at the repository layer
 
-### Frontend Architecture
+For comprehensive backend design rationale, see [MapServer/ARCHITECTURE_DECISIONS.md](MapServer/ARCHITECTURE_DECISIONS.md).
 
-- **Feature-based structure** - code organized by feature (map, polygons, objects) not by type
-- **Split Context pattern** - separate state/dispatch contexts to prevent unnecessary re-renders
-- **React Query for server state** - automatic caching, refetching, loading/error states
-- **Custom hooks** (`usePolygons`, `useObjects`) - encapsulate data fetching logic
+### Frontend (MapClient)
 
-### Coordinate Handling
+The React client demonstrates modern frontend patterns:
 
-The API uses explicit `{ latitude, longitude }` objects rather than arrays because:
-
-- GeoJSON uses `[longitude, latitude]` order
-- Leaflet uses `[latitude, longitude]` order
-- Named properties prevent accidental coordinate swaps
-
-Conversion happens at the repository layer, keeping the API clean.
-
-For comprehensive design rationale, see [MapServer/ARCHITECTURE_DECISIONS.md](MapServer/ARCHITECTURE_DECISIONS.md).
-
-## Documentation
-
-- [ARCHITECTURE_DECISIONS.md](MapServer/ARCHITECTURE_DECISIONS.md) - Detailed rationale for every architectural choice, with alternatives considered
-- [BACKEND_CONCEPTS.md](MapServer/BACKEND_CONCEPTS.md) - Backend programming concepts explained in plain English
+| Pattern                     | Implementation                                     | Benefit                                                 |
+| --------------------------- | -------------------------------------------------- | ------------------------------------------------------- |
+| **Feature-based structure** | Code organized by feature (map, polygons, objects) | Scalability, co-location of related code                |
+| **Split Context pattern**   | Separate state/dispatch contexts                   | Prevents unnecessary re-renders                         |
+| **React Query**             | Server state with automatic caching                | Eliminates boilerplate, consistent loading/error states |
+| **Custom hooks**            | `usePolygons`, `useObjects` with React Query       | Encapsulated data fetching, reusable logic              |
+| **Memoization**             | `React.memo`, `useMemo` for icons/components       | Prevents expensive re-renders                           |
+| **Lazy loading**            | `React.lazy` for non-critical panels               | Reduced initial bundle size                             |
+| **Error boundaries**        | Class components wrapping feature groups           | Graceful degradation                                    |
+| **Type-safe actions**       | Discriminated unions for reducer actions           | Compile-time action validation                          |
